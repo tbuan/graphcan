@@ -51,7 +51,19 @@ function Header({ onFileImport, onBinaryImport, onDbcImport, dbcName, onDbcClear
 
   return (
     <header className="header">
-      <span className="header-logo" aria-hidden="true">⚡</span>
+      <svg
+        className="header-logo"
+        width="38" height="22"
+        viewBox="0 0 38 22"
+        aria-hidden="true"
+        fill="none"
+        stroke="#111110"
+        strokeWidth="2.2"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      >
+        <polyline points="0,17 8,17 8,5 21,5 21,17 28,17 28,5 38,5" />
+      </svg>
       <h1 className="header-title">GraphCan</h1>
 
       <div className="header-actions">

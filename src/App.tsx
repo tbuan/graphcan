@@ -23,6 +23,7 @@ function App() {
     () => loadChartConfig() ?? DEFAULT_CHART_CONFIG
   )
   const [analysisPanels, setAnalysisPanels] = useState<AnalysisPanel[]>([])
+  const [sidebarWidth, setSidebarWidth]     = useState(224)
 
   // Restore persisted data on mount
   useEffect(() => {
@@ -82,6 +83,29 @@ function App() {
     setAnalysisPanels(prev => prev.filter(p => p.uid !== uid))
   }
 
+  function handleResizeStart(e: React.MouseEvent) {
+    e.preventDefault()
+    const startX     = e.clientX
+    const startWidth = sidebarWidth
+
+    function onMouseMove(ev: MouseEvent) {
+      const newWidth = Math.max(160, Math.min(480, startWidth + ev.clientX - startX))
+      setSidebarWidth(newWidth)
+    }
+
+    function onMouseUp() {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+      document.body.style.cursor    = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor    = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+  }
+
   return (
     <BrowserRouter>
       <div className="app">
@@ -94,18 +118,21 @@ function App() {
         />
         <NavTabs />
         <div className="app-body">
-          <Sidebar
-            importedFile={importedFile}
-            dbcData={dbcData}
-            onAddSignal={signal => {
-              setChartConfig(prev => {
-                const exists = prev.signals.some(s => s.id === signal.id && s.byteIndex === signal.byteIndex)
-                if (exists) return prev
-                return { ...prev, signals: [...prev.signals, signal] }
-              })
-            }}
-            onAddPanel={handleAddPanel}
-          />
+          <div className="sidebar-container" style={{ width: sidebarWidth }}>
+            <Sidebar
+              importedFile={importedFile}
+              dbcData={dbcData}
+              onAddSignal={signal => {
+                setChartConfig(prev => {
+                  const exists = prev.signals.some(s => s.id === signal.id && s.byteIndex === signal.byteIndex)
+                  if (exists) return prev
+                  return { ...prev, signals: [...prev.signals, signal] }
+                })
+              }}
+              onAddPanel={handleAddPanel}
+            />
+          </div>
+          <div className="resize-handle" onMouseDown={handleResizeStart} />
           <main className="main-content">
             <Routes>
               <Route path="/" element={<Navigate to="/table" replace />} />
