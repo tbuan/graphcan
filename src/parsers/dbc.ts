@@ -2,10 +2,11 @@ export interface DbcSignal {
   name: string
   startBit: number
   length: number
+  isLittleEndian: boolean
+  isSigned: boolean
   factor: number
   offset: number
   unit: string
-  isSigned: boolean
 }
 
 export interface DbcMessage {
@@ -21,8 +22,9 @@ export type DbcData = Record<string, DbcMessage>
 const BO_REGEX = /^BO_ (\d+) (\w+)\s*:\s*(\d+)/
 
 // SG_ SignalName : 0|16@1+ (0.01,-40) [0|0] "km/h" Receivers
+// @1 = Intel/little-endian, @0 = Motorola/big-endian
 const SG_REGEX =
-  /^\s+SG_ (\w+)\s*:\s*(\d+)\|(\d+)@\d([+-])\s*\(([^,]+),([^)]+)\)\s*\[[^\]]+\]\s*"([^"]*)"/
+  /^\s+SG_ (\w+)\s*:\s*(\d+)\|(\d+)@(\d)([+-])\s*\(([^,]+),([^)]+)\)\s*\[[^\]]+\]\s*"([^"]*)"/
 
 function normalizeId(rawId: number): string {
   // Bit 31 is used by some tools to mark extended (29-bit) frames — strip it
@@ -50,13 +52,14 @@ export function parseDbcFile(content: string): DbcData {
       const sgMatch = SG_REGEX.exec(line)
       if (sgMatch) {
         data[currentKey].signals.push({
-          name: sgMatch[1],
-          startBit: parseInt(sgMatch[2], 10),
-          length: parseInt(sgMatch[3], 10),
-          isSigned: sgMatch[4] === '-',
-          factor: parseFloat(sgMatch[5]),
-          offset: parseFloat(sgMatch[6]),
-          unit: sgMatch[7],
+          name:           sgMatch[1],
+          startBit:       parseInt(sgMatch[2], 10),
+          length:         parseInt(sgMatch[3], 10),
+          isLittleEndian: sgMatch[4] === '1',
+          isSigned:       sgMatch[5] === '-',
+          factor:         parseFloat(sgMatch[6]),
+          offset:         parseFloat(sgMatch[7]),
+          unit:           sgMatch[8],
         })
       }
     }

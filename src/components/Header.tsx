@@ -42,7 +42,8 @@ function Header({ onFileImport, onDbcImport, dbcName, onDbcClear }: HeaderProps)
       <div className="header-actions">
         {dbcName ? (
           <span className="dbc-badge" title={dbcName}>
-            DBC: {dbcName}
+            <span className="dbc-badge-label">DBC</span>
+            <span className="dbc-badge-name">{dbcName}</span>
             <button className="dbc-badge-clear" onClick={onDbcClear} aria-label="Remove DBC">×</button>
           </span>
         ) : (

@@ -118,13 +118,19 @@ function UPlotChart({ data, signals, displayMode }: UPlotChartProps) {
         },
         {
           stroke: THEME.textMuted,
-          ticks: { stroke: THEME.border },
-          grid:  { stroke: THEME.border, width: 1 },
-          label: 'Value (0–255)',
-          size: 55,
+          ticks:  { stroke: THEME.border },
+          grid:   { stroke: THEME.border, width: 1 },
+          label:  'Value (0–255)',
+          size:   55,
+          splits: (_u, _axisIdx, scaleMin, scaleMax, foundIncr) => {
+            const result: number[] = []
+            for (let v = scaleMin; v < scaleMax; v += foundIncr) result.push(v)
+            result.push(scaleMax)
+            return result
+          },
         },
       ],
-      scales: { y: { range: [0, 255] } },
+      scales: { y: { range: () => [0, 255] } },
     }
 
     plotRef.current = new uPlot(opts, data, container)

@@ -1,8 +1,9 @@
-import { useState, useMemo, useRef, useEffect } from 'react'
+import { useState, useMemo, useRef, useEffect, Fragment } from 'react'
 import type { CanFrame } from '../parsers/busmaster'
 import type { DbcData } from '../parsers/dbc'
 import { parseTimestampToMs, formatDelta } from '../utils/time'
 import { getMessageLabel, getMessageName } from '../utils/dbc'
+import { decodeSignal } from '../utils/decodeSignal'
 
 interface FrameTableProps {
   frames: CanFrame[]
@@ -35,6 +36,7 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
   const [filterOpen, setFilterOpen] = useState(false)
   const [selectedA, setSelectedA] = useState<number | null>(null)
   const [selectedB, setSelectedB] = useState<number | null>(null)
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
   const filterRef = useRef<HTMLDivElement>(null)
 
   // Close filter panel when clicking outside
@@ -128,6 +130,14 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
     setSelectedB(originalIndex)
   }
 
+  function toggleExpand(originalIndex: number) {
+    setExpandedRows(prev => {
+      const next = new Set(prev)
+      next.has(originalIndex) ? next.delete(originalIndex) : next.add(originalIndex)
+      return next
+    })
+  }
+
   function getSortIcon(column: SortColumn) {
     if (sortConfig?.column !== column) return <span className="sort-icon inactive">⇅</span>
     return <span className="sort-icon">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
@@ -203,6 +213,7 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
         <table className="frame-table">
           <thead>
             <tr>
+              <th className="th-expand"></th>
               <th className="th-sortable" onClick={() => toggleSort('timestamp')}>
                 Timestamp {getSortIcon('timestamp')}
               </th>
@@ -223,21 +234,58 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
             {displayedFrames.map(({ frame, originalIndex }) => {
               const isA = selectedA === originalIndex
               const isB = selectedB === originalIndex
+              const message = dbcData?.[frame.id]
+              const hasSignals = (message?.signals.length ?? 0) > 0
+              const isExpanded = expandedRows.has(originalIndex)
               return (
-                <tr
-                  key={originalIndex}
-                  onClick={() => handleRowClick(originalIndex)}
-                  className={isA ? 'row-selected-a' : isB ? 'row-selected-b' : ''}
-                >
-                  <td className="cell-mono">{frame.timestamp}</td>
-                  <td className={frame.direction === 'Rx' ? 'cell-rx' : 'cell-tx'}>
-                    {frame.direction}
-                  </td>
-                  <td>{frame.channel}</td>
-                  <td className="cell-mono cell-id" title={frame.id}>{getMessageName(frame.id, dbcData)}</td>
-                  <td>{frame.dlc}</td>
-                  <td className="cell-mono cell-data">{frame.data.join(' ')}</td>
-                </tr>
+                <Fragment key={originalIndex}>
+                  <tr
+                    onClick={() => handleRowClick(originalIndex)}
+                    className={isA ? 'row-selected-a' : isB ? 'row-selected-b' : ''}
+                  >
+                    <td className="cell-expand">
+                      {hasSignals && (
+                        <button
+                          className="btn-expand"
+                          onClick={e => { e.stopPropagation(); toggleExpand(originalIndex) }}
+                          aria-label={isExpanded ? 'Collapse signals' : 'Expand signals'}
+                        >
+                          {isExpanded ? '▼' : '▶'}
+                        </button>
+                      )}
+                    </td>
+                    <td className="cell-mono">{frame.timestamp}</td>
+                    <td className={frame.direction === 'Rx' ? 'cell-rx' : 'cell-tx'}>
+                      {frame.direction}
+                    </td>
+                    <td>{frame.channel}</td>
+                    <td className="cell-mono cell-id" title={frame.id}>{getMessageName(frame.id, dbcData)}</td>
+                    <td>{frame.dlc}</td>
+                    <td className="cell-mono cell-data">{frame.data.join(' ')}</td>
+                  </tr>
+                  {isExpanded && message && (
+                    <tr className="row-signals">
+                      <td colSpan={7}>
+                        <div className="signal-decode-grid">
+                          {message.signals.map(signal => {
+                            const bytes = frame.data.map(b => parseInt(b, 16))
+                            const value = decodeSignal(bytes, signal)
+                            const formatted = isFinite(value)
+                              ? parseFloat(value.toPrecision(6)).toString()
+                              : '—'
+                            return (
+                              <div key={signal.name} className="signal-decode-item">
+                                <span className="signal-decode-name">{signal.name}</span>
+                                <span className="signal-decode-value">{formatted}</span>
+                                {signal.unit && <span className="signal-decode-unit">{signal.unit}</span>}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               )
             })}
           </tbody>

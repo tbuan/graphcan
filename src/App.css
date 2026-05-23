@@ -439,6 +439,9 @@
 /* Header actions */
 .header-actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .btn-import {
@@ -451,10 +454,67 @@
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.15s;
+  white-space: nowrap;
 }
 
 .btn-import:hover {
   opacity: 0.85;
+}
+
+.btn-import-secondary {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.btn-import-secondary:hover {
+  opacity: 1;
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+/* DBC badge (shown when a DBC file is loaded) */
+.dbc-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(79, 142, 247, 0.08);
+  border: 1px solid rgba(79, 142, 247, 0.25);
+  border-radius: 6px;
+  padding: 5px 8px 5px 12px;
+  font-size: 12px;
+  color: var(--color-accent);
+  max-width: 220px;
+}
+
+.dbc-badge-label {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.dbc-badge-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.dbc-badge-clear {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.dbc-badge-clear:hover {
+  color: var(--color-text);
 }
 
 /* File preview */
@@ -760,4 +820,83 @@
 .cell-data {
   letter-spacing: 0.05em;
   color: var(--color-text-muted);
+}
+
+/* ─── Expand button ───────────────────────────────────────── */
+.th-expand {
+  width: 28px;
+  padding: 0 !important;
+}
+
+.cell-expand {
+  width: 28px;
+  padding: 2px 4px !important;
+  text-align: center;
+}
+
+.btn-expand {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 8px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+
+.btn-expand:hover {
+  color: var(--color-accent);
+  background: rgba(79, 142, 247, 0.1);
+}
+
+/* ─── Signal decode sub-row ───────────────────────────────── */
+.row-signals {
+  cursor: default !important;
+}
+
+.row-signals:hover {
+  background: transparent !important;
+}
+
+.row-signals > td {
+  padding: 0 !important;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.signal-decode-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px 10px 28px;
+  background: rgba(79, 142, 247, 0.03);
+  border-left: 2px solid var(--color-accent);
+}
+
+.signal-decode-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.signal-decode-name {
+  color: var(--color-text-muted);
+  font-family: monospace;
+}
+
+.signal-decode-value {
+  color: var(--color-text);
+  font-family: monospace;
+  font-weight: 500;
+}
+
+.signal-decode-unit {
+  color: var(--color-text-muted);
+  font-size: 10px;
 }
