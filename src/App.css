@@ -436,6 +436,47 @@
   border-color: var(--color-accent);
 }
 
+/* Signal picker (Analysis page — DBC signal names) */
+.sidebar-signal-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px 8px;
+}
+
+.sidebar-signal-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: monospace;
+  text-align: left;
+  overflow: hidden;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.sidebar-signal-btn:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.signal-mux-badge {
+  margin-left: auto;
+  background: #2a3a5c;
+  color: #60a5fa;
+  border-radius: 3px;
+  font-size: 9px;
+  padding: 1px 4px;
+  font-family: monospace;
+  flex-shrink: 0;
+}
+
 /* Header actions */
 .header-actions {
   margin-left: auto;
@@ -596,11 +637,18 @@
 }
 
 /* Controls */
+.frame-table-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .frame-table-controls {
   position: relative;
 }
 
-.btn-filter {
+.btn-filter,
+.btn-hex-toggle {
   background: var(--color-surface);
   color: var(--color-text);
   border: 1px solid var(--color-border);
@@ -608,10 +656,17 @@
   padding: 5px 12px;
   font-size: 12px;
   cursor: pointer;
+  font-family: monospace;
 }
 
-.btn-filter:hover {
+.btn-filter:hover,
+.btn-hex-toggle:hover {
   border-color: var(--color-accent);
+}
+
+.btn-hex-toggle.active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .filter-panel {
@@ -822,6 +877,97 @@
   color: var(--color-text-muted);
 }
 
+/* ─── Analysis view ───────────────────────────────────────── */
+.analysis-view {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: flex-start;
+}
+
+.signal-panel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.signal-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.signal-panel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.signal-panel-label {
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--color-text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.signal-panel-value {
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--color-accent);
+  min-width: 40px;
+  text-align: right;
+}
+
+.signal-panel-mode {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: monospace;
+  padding: 1px 5px;
+  transition: color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.signal-panel-mode:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.signal-panel-remove {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.signal-panel-remove:hover {
+  color: var(--color-text);
+}
+
+.signal-panel-chart {
+  height: 200px;
+}
+
 /* ─── Expand button ───────────────────────────────────────── */
 .th-expand {
   width: 28px;
@@ -899,4 +1045,14 @@
 .signal-decode-unit {
   color: var(--color-text-muted);
   font-size: 10px;
+}
+
+.signal-decode-label {
+  color: #86efac;
+  font-size: 10px;
+  background: #14532d55;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: sans-serif;
+  font-weight: 500;
 }

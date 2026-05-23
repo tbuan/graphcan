@@ -1,0 +1,764 @@
+VERSION ""
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: T_CEGB T_CEGC T_FLCC_CEG T_FLMC T_FLMS T_HYMC_CEG T_VBCC_CEG T_VBMC_CEG T_VDCC_CEG T_VHBC_CEG
+
+
+BO_ 2348810468 tFlmsBrc_FlmmAlive: 8 T_FLMS
+  SG_ ModuleAliveMsgCounter : 0|8@1+ (1,0) [0|255] "" T_CEGB
+  SG_ ModuleStatus : 8|8@1+ (1,0) [0|255] "" T_CEGB
+  SG_ FunctionalityIdent : 32|8@1+ (1,0) [0|255] "" T_CEGB
+  SG_ SwVersionHigh : 40|8@1+ (1,0) [0|99] "" T_CEGB
+  SG_ SwVersionMiddle : 48|8@1+ (1,0) [0|99] "" T_CEGB
+  SG_ SwVersionLow : 56|8@1+ (1,0) [0|99] "" T_CEGB
+
+BO_ 2348877284 tFlmsVbccAlarm: 8 T_FLMS
+  SG_ AlarmId : 0|16@1+ (1,0) [0|65535] "" T_VBCC_CEG
+  SG_ AlarmStatus : 16|8@1+ (1,0) [0|255] "" T_VBCC_CEG
+  SG_ AlarmMsgCounter : 24|8@1+ (1,0) [0|255] "" T_VBCC_CEG
+
+BO_ 2349203489 tVbmcBrc_SystemStatus: 8 T_VBMC_CEG
+  SG_ OverallEemState : 0|5@1+ (1,0) [0|31] "" T_FLMC
+  SG_ CrankingState : 8|5@1+ (1,0) [0|15] "" T_FLMC
+  SG_ AvailableFeedback : 16|3@1+ (1,0) [0|7] "" T_FLMC
+  SG_ DiagInhibit : 19|2@1+ (1,0) [0|3] "" T_FLMC
+  SG_ DoorPosition : 21|2@1+ (1,0) [0|3] "" T_FLMC
+  SG_ EngineSpinState : 24|4@1+ (1,0) [0|15] "" T_FLMC
+  SG_ PhaseCountdown : 32|12@1+ (1,0) [0|4095] "s" T_FLMC
+  SG_ LatchReason : 48|4@1+ (1,0) [0|15] "" T_FLMC
+  SG_ VoltageProfile : 52|4@1+ (1,0) [0|15] "" T_FLMC
+  SG_ EventCode : 56|8@1+ (1,0) [0|255] "" T_FLMC
+
+BO_ 2350907397 tVbccBrc_MachineManagement: 8 T_VBCC_CEG
+  SG_ MachineMgr_Request : 7|8@0+ (1,0) [0|255] "" T_FLMC
+  SG_ MachineMgr_ActionCounter : 15|16@0+ (1,0) [0|65535] "" T_FLMC
+
+BO_ 2418205702 tHymcFlccHydraulicState: 8 T_HYMC_CEG
+  SG_ LiftLowerValveState : 4|4@1+ (1,0) [0|15] "" T_FLMC
+  SG_ LiftLowerValveFlow : 8|8@1+ (0.4,0) [0|100] "%" T_FLMC
+  SG_ DumpCrowdValveState : 20|4@1+ (1,0) [0|15] "" T_FLMC
+  SG_ DumpCrowdValveFlow : 24|8@1+ (0.4,0) [0|100] "%" T_FLMC
+  SG_ HymcSeqNo_HydState : 48|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ HymcCRC_HydState : 56|8@1+ (1,0) [0|255] "" T_FLMC
+
+BO_ 2435020004 tFlmcFlccFrontLoaderStatus2: 8 T_FLMC
+  SG_ BoomHeightActVal : 0|8@1+ (1,0) [0|100] "%" T_FLCC_CEG
+  SG_ BucketPositionActVal : 8|16@1+ (1,-200) [-200|200] " " T_FLCC_CEG
+  SG_ MaterialWeight : 24|16@1+ (1,-5000) [-5000|5000] "kg" T_FLCC_CEG
+  SG_ DeviceWeight_Accuracy : 40|8@1+ (1,0) [0|100] "%" T_FLCC_CEG
+  SG_ FlmcSeqNo_Status : 48|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ FlmcCRC_Status : 56|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+
+BO_ 2485256420 tFlmcBrc_FrontLoaderSensor: 8 T_FLMC
+  SG_ LiftPressureSensor : 0|16@1+ (0.01,0) [0|650.23] "" T_CEGB
+  SG_ LowerPressureSensor : 16|16@1+ (0.01,0) [0|650.23] "" Vector__XXX
+  SG_ BoomAngleSensor : 32|16@1+ (0.0054931640625,0) [0|360] "" Vector__XXX
+  SG_ ToolAngleSensor : 48|16@1+ (0.0054931640625,0) [0|360] "" Vector__XXX
+
+BO_ 2485351652 tFlmcFlccRsp2: 8 T_FLMC
+  SG_ RequestType_Rsp M : 0|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ RequestType_GenericRsp : 8|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ CalibrationMode_Rsp m3 : 16|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ PositionCtrlMode_Rsp m2 : 16|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ StoredData_Rsp m0 : 16|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ BoomHeight_SetPoint m2 : 24|8@1+ (1,0) [0|253] "%" T_FLCC_CEG
+  SG_ WeightReference m3 : 24|16@1+ (1,0) [0|65023] "kg" T_FLCC_CEG
+  SG_ BucketPosition_SetPoint m2 : 32|16@1+ (1,-200) [-200|200] " " T_FLCC_CEG
+  SG_ CRCDummy_1 m3 : 40|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ CRCDummy_1 m0 : 40|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ FlcmSeqNo_Rsp : 48|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+  SG_ FlcmCRC_Rsp : 56|8@1+ (1,0) [0|255] "" T_FLCC_CEG
+
+BO_ 2485380212 tFlccFlmcRqst2: 8 T_FLCC_CEG
+  SG_ RequestType_Rqst M : 0|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ CRCDummy_2 : 8|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ CalibrationMode_Rqst m3 : 16|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ PositionCtrlMode_Rqst m2 : 16|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ StoredData_Rqst m0 : 16|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ BoomHeight_SetPoint m2 : 24|8@1+ (1,0) [0|253] "%" T_FLMC
+  SG_ WeightReference m3 : 24|16@1+ (1,0) [0|65023] "kg" T_FLMC
+  SG_ BucketPosition_SetPoint m2 : 32|16@1+ (1,-200) [-200|200] " " T_FLMC
+  SG_ CRCDummy_1 m0 : 40|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ CRCDummy_1 m3 : 40|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ FlcmSeqNo_Rqst : 48|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ FlcmCRC_Rqst : 56|8@1+ (1,0) [0|255] "" T_FLMC
+
+BO_ 2485389028 tFlmcHymcHydraulicRequest2: 8 T_FLMC
+  SG_ LiftLowerValveState : 0|8@1+ (1,0) [0|255] "" T_HYMC_CEG
+  SG_ LiftLowerValveFlow : 8|8@1+ (0.4,0) [0|100] "%" T_HYMC_CEG
+  SG_ DumpCrowdValveState : 16|8@1+ (1,0) [0|255] "" T_HYMC_CEG
+  SG_ DumpCrowdValveFlow : 24|8@1+ (0.4,0) [0|100] "%" T_HYMC_CEG
+  SG_ CRCDummy_1 : 32|8@1+ (1,0) [0|255] "" T_HYMC_CEG
+  SG_ CRCDummy_2 : 40|8@1+ (1,0) [0|255] "" T_HYMC_CEG
+  SG_ FlcmSeqNo_Rqst : 48|8@1+ (1,0) [0|255] "" T_HYMC_CEG
+  SG_ FlcmCRC_Rqst : 56|8@1+ (1,0) [0|255] "" T_HYMC_CEG
+
+BO_ 2487418883 tVhbcBrc_VehicleHours: 8 T_VHBC_CEG
+  SG_ TotalVehicleHours : 0|32@1+ (1,0) [0|4261412863] "s" T_FLMC
+
+BO_ 2487484439 tVdccBrc_EngineStatus: 8 T_VDCC_CEG
+  SG_ EngineRpmSignalActVal : 8|16@1+ (0.1,0) [0|6500] "rpm" T_FLMC
+
+BO_ 2554455140 tHymcFlmcValveSettings2: 8 T_HYMC_CEG
+  SG_ LiftLowerValveExtendedFlowMax : 0|8@1+ (0.4,0) [0|100] "%" T_FLMC
+  SG_ LiftLowerValveRetractFlowMax : 8|8@1+ (0.4,0) [0|100] "%" T_FLMC
+  SG_ DumpCrowdValveExtendedFlowMax : 16|8@1+ (0.4,0) [0|100] "%" T_FLMC
+  SG_ DumpCrowdValveRetractFlowMax : 24|8@1+ (0.4,0) [0|100] "%" T_FLMC
+  SG_ DumpCrowdValveProgressivity : 32|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ LiftLowerValveProgressivity : 40|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ HymcSeqNo_ValveSetting2 : 48|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ HymcCRC_ValveSetting2 : 56|8@1+ (1,0) [0|255] "" T_FLMC
+
+BO_ 2554520676 tHymcFlmcValveSettings3: 8 T_HYMC_CEG
+  SG_ ConfigHydPumpCapacity : 0|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ EstimatedHydPumpFlow : 8|8@1+ (1,0) [0|250] "l/min" T_FLMC
+  SG_ CRCDummy_1 : 16|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ CRCDummy_2 : 24|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ CRCDummy_3 : 32|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ CRCDummy_4 : 40|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ HymcSeqNo_ValveSetting3 : 48|8@1+ (1,0) [0|255] "" T_FLMC
+  SG_ HymcCRC_ValveSetting3 : 56|8@1+ (1,0) [0|255] "" T_FLMC
+
+
+CM_ BO_ 2348810468 "Alive message: Arm-rest"; 
+CM_ BO_ 2348877284 "Alarm message: Arm-rest"; 
+CM_ BO_ 2350907397 "Status of Alive-Monitoring"; 
+CM_ BO_ 2435020004 "Cyclic, 50 ms"; 
+CM_ BO_ 2485351652 "CyclicIfActive, 20 ms"; 
+CM_ BO_ 2485380212 "CyclicIfActive and spontaneous,100ms or 250 ms "; 
+CM_ BO_ 2485389028 "CyclicIfActive, 20 ms "; 
+CM_ BO_ 2487418883 "Information according to Operating Hours"; 
+CM_ BO_ 2554455140 "Cyclic, 2000 ms"; 
+CM_ BO_ 2554520676 "Cyclic, 2000 ms"; 
+CM_ SG_ 2348810468 ModuleAliveMsgCounter "Alive counter of each active module"; 
+CM_ SG_ 2348810468 ModuleStatus "Module active"; 
+CM_ SG_ 2348810468 FunctionalityIdent "This ECU specific information is to supplement the version number of ECU software. It is used to identify the functionality of the ECU."; 
+CM_ SG_ 2348810468 SwVersionHigh "High part (leftmost element) of version number of ECU software."; 
+CM_ SG_ 2348810468 SwVersionMiddle "Middle part (element in the middle) of version number of ECU software."; 
+CM_ SG_ 2348810468 SwVersionLow "Low part (rightmost element) of version number of ECU software."; 
+CM_ SG_ 2348877284 AlarmId "Alarm specification"; 
+CM_ SG_ 2348877284 AlarmStatus "AlarmStatus"; 
+CM_ SG_ 2348877284 AlarmMsgCounter "Alarm-Counter"; 
+CM_ SG_ 2350907397 MachineMgr_Request "Status of Alive-Monitoring"; 
+CM_ SG_ 2350907397 MachineMgr_ActionCounter "Sequence counter for Alive-Monitoring"; 
+CM_ SG_ 2487418883 TotalVehicleHours "0 to 4 261 412 863 s"; 
+CM_ SG_ 2487484439 EngineRpmSignalActVal "Configuration: Sales type"; 
+
+BA_DEF_ BO_  "CyclicOnOff" INT 0 1;
+BA_DEF_ BO_  "DiagUUDTResponse" ENUM "No","Yes";
+BA_DEF_ SG_  "EE_SignalType" ENUM "BOOL","INT","UINT","FLOAT","BUFFER";
+BA_DEF_ BO_  "LogicalFctName" STRING;
+BA_DEF_ BO_  "ServiceName" STRING;
+BA_DEF_ BO_  "SomeIpSendMode" ENUM "NotSet","CAN2ETH","ETH2CAN";
+BA_DEF_ SG_  "ASR_ValueTableName" STRING;
+BA_DEF_ SG_  "Sig_IfcType" ENUM "AlarmIfc","AliveIfc","Broadcast","CanReq","ConfigIfc","CounterIfc","CtrlIfc","ParamIfc","SignalIfc1","SignalIfc2","J1939","None","SafetyProtocol","CvuIfc","RioIfc","DevIfc","DiagIfc","J1939","ControlIfc","IndicatorIfc";
+BA_DEF_ SG_  "GenSigCycleTimeActive" INT 0 0;
+BA_DEF_ SG_  "ASR_GenSigStartValue" INT 0 2147483647;
+BA_DEF_ SG_  "ASR_GenSigSendType" ENUM "Cyclic","OnWrite","NotUsed","OnChange","NotUsed","NotUsed","NotUsed","NoSigSendType";
+BA_DEF_ SG_  "SPN" INT 0 524287;
+BA_DEF_ SG_  "GenSigILSupport" ENUM "No","Yes";
+BA_DEF_ SG_  "SigType" ENUM "Default","Range","RangeSigned","ASCII","Discrete","Control","ReferencePGN","DTC","StringDelimiter","StringLength","StringLengthControl","MessageCounter","MessageChecksum";
+BA_DEF_ SG_  "Claas_Comment_Signal" STRING;
+BA_DEF_ SG_  "GenSigStartValue" FLOAT 0 0;
+BA_DEF_ SG_  "GenSigCycleTime" INT 0 0;
+BA_DEF_ SG_  "GenSigSendType" ENUM "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "SignalType" ENUM "Data","MachineMgr","MsgCounter","ModuleStatus","AlarmId","AlarmStatus","Set","Type","FruidId","SetVal","ActVal","State","SetValNo","Sel","J1939Signal","CommandByte","DataByte","Crc","SequenceNumber","MonitorStatus","MonitorCounter","Startsign","Duration","OpCounter","Req","Info";
+BA_DEF_ BO_  "ASR_E2E_Protection_ID" INT 0 4095;
+BA_DEF_ BO_  "GenMsgRepetitionCount" INT 0 0;
+BA_DEF_ BO_  "GenMsgRepetitionDelay" INT 0 0;
+BA_DEF_ BO_  "GenMsgMinimumDistance" INT 0 0;
+BA_DEF_ BO_  "ASR_E2E_Protection" ENUM "NoProtection","E2E_Prof1C_Rx","E2E_Prof1C_Tx","E2E_Prof5_Rx","E2E_Prof5_Tx","E2E_Prof6_Rx","E2E_Prof6_Tx","vector_leerstring";
+BA_DEF_ BO_  "ASR_UseMessage" ENUM "No","Yes";
+BA_DEF_ BO_  "ASR_GenSignalGroups" ENUM "No","Yes";
+BA_DEF_ BO_  "ASR_GenMsgStartDelayTime" INT 0 65535;
+BA_DEF_ BO_  "ASR_GenMsgSigSendType" ENUM "Cyclic","OnWrite","NotUsed","OnChange","NotUsed","NotUsed","NotUsed","NoSigSendType","SendTypeBySignal";
+BA_DEF_ BO_  "ASR_GenMsgSendType" ENUM "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NoMsgSendType";
+BA_DEF_ BO_  "ASR_GenMsgILSupport" ENUM "No","Yes";
+BA_DEF_ BO_  "ASR_GenMsgDelayTime" INT 0 65635;
+BA_DEF_ BO_  "ASR_GenMsgCycleTime" INT 0 65535;
+BA_DEF_ BO_  "GenMsgRequestable" INT 0 1;
+BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 100000;
+BA_DEF_ BO_  "GenMsgFastOnStart" INT 0 100000;
+BA_DEF_ BO_  "GenMsgCycleTimeFast" INT 0 3600000;
+BA_DEF_ BO_  "TpJ1939VarDlc" ENUM "No","Yes";
+BA_DEF_ BO_  "DiagConnection" INT 0 65535;
+BA_DEF_ BO_  "DiagResponse" ENUM "No","Yes";
+BA_DEF_ BO_  "DiagRequest" ENUM "No","Yes";
+BA_DEF_ BO_  "DiagState" ENUM "No","Yes";
+BA_DEF_ BO_  "GenMsgILSupport" ENUM "No","Yes";
+BA_DEF_ BO_  "Claas_Comment_Message" STRING;
+BA_DEF_ BO_  "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","reserved","J1939PG";
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 999999;
+BA_DEF_ BO_  "GenMsgDelayTime" INT 0 1000;
+BA_DEF_ BO_  "IfcType" ENUM "AlarmIfc","AliveIfc","Broadcast","DoNotUse_CanReq","ConfigIfc","DoNotUse_CounterIfc","CtrlIfc","ParamIfc","SignalIfc1","SignalIfc2","J1939","None","SafetyProtocol","CvuIfc","RioIfc","DevIfc","DoNotUse_DiagIfc","CAN2CAN","ControlIfc","IndicatorIfc","SupvAggIfc","RciIfc";
+BA_DEF_ BO_  "IfcFct_Storage" ENUM "NotAvailable","NotConfigured","Configured";
+BA_DEF_ BO_  "GenMsgSendType" ENUM "cyclic","spontaneous","cyclicIfActive","spontaneousWithDelay","cyclicAndSpontaneous","cyclicAndSpontaneousWithDelay","spontaneousWithRepetition","NoMsgSendType","NotDefined","cyclicIfActiveAndSpontaneous","cyclicAndSpontaneousWDAndWR","DoNotUseOnReq";
+BA_DEF_ BO_  "FctAddress" HEX 0 255;
+BA_DEF_ BO_  "FctName" STRING;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BU_  "ILUsed" ENUM "no","yes";
+BA_DEF_ BU_  "NmAsrNodeIdentifier" HEX 0 255;
+BA_DEF_ BU_  "NodeLayerModules" STRING;
+BA_DEF_ BU_  "Claas_Comment_Node" STRING;
+BA_DEF_ BU_  "NmJ1939AAC" INT 0 1;
+BA_DEF_ BU_  "NmJ1939ECUInstance" INT 0 3;
+BA_DEF_ BU_  "TpOwnSystemEcuNumber" HEX 0 255;
+BA_DEF_ BU_  "NmJ1939Function" INT 0 255;
+BA_DEF_ BU_  "NmJ1939FunctionInstance" INT 0 7;
+BA_DEF_ BU_  "NmStationAddress" HEX 0 0;
+BA_DEF_ BU_  "Claas_Comment_Ecu" STRING;
+BA_DEF_ BU_  "NmJ1939IdentityNumber" INT 0 2097151;
+BA_DEF_  "NmAsrBaseAddress" HEX 351338496 351338751;
+BA_DEF_ BU_  "NmJ1939IndustryGroup" INT 0 7;
+BA_DEF_  "NmAsrCanMsgCycleTime" INT 0 65535;
+BA_DEF_ BU_  "NmJ1939ManufacturerCode" INT 0 2047;
+BA_DEF_  "NmAsrMessageCount" INT 0 256;
+BA_DEF_ BU_  "NmJ1939System" INT 0 127;
+BA_DEF_  "NmAsrRepeatMessageTime" INT 0 65535;
+BA_DEF_ BU_  "NmJ1939SystemInstance" INT 0 15;
+BA_DEF_  "NmAsrTimeoutTime" INT 0 65535;
+BA_DEF_  "NmAsrWaitBusSleepTime" INT 0 65535;
+BA_DEF_  "NmType" STRING;
+BA_DEF_  "Baudrate" INT 0 1000000;
+BA_DEF_  "ProtocolType" STRING;
+BA_DEF_  "DatabaseVersion" STRING;
+BA_DEF_  "DBName" STRING;
+BA_DEF_  "Claas_Comment_Network" STRING;
+BA_DEF_  "UsesClaasProtocol" ENUM "NotDefined","No","Yes";
+BA_DEF_  "BusType" STRING;
+BA_DEF_  "Manufacturer" STRING;
+BA_DEF_ SG_  "SystemSignalLongSymbol" STRING;
+BA_DEF_ BU_  "ECU" STRING;
+
+
+
+BA_DEF_DEF_  "ASR_E2E_Protection" "NoProtection";
+BA_DEF_DEF_  "ASR_E2E_Protection_ID" 0;
+BA_DEF_DEF_  "ASR_GenMsgCycleTime" 0;
+BA_DEF_DEF_  "ASR_GenMsgDelayTime" 100;
+BA_DEF_DEF_  "ASR_GenMsgILSupport" "Yes";
+BA_DEF_DEF_  "ASR_GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "ASR_GenMsgSigSendType" "OnWrite";
+BA_DEF_DEF_  "ASR_GenMsgStartDelayTime" 1000;
+BA_DEF_DEF_  "ASR_GenSigSendType" "NoSigSendType";
+BA_DEF_DEF_  "ASR_GenSigStartValue" 0;
+BA_DEF_DEF_  "ASR_GenSignalGroups" "Yes";
+BA_DEF_DEF_  "ASR_UseMessage" "Yes";
+BA_DEF_DEF_  "Baudrate" 250000;
+BA_DEF_DEF_  "CyclicOnOff" 0;
+BA_DEF_DEF_  "DiagConnection" 0;
+BA_DEF_DEF_  "DiagRequest" "No";
+BA_DEF_DEF_  "DiagResponse" "No";
+BA_DEF_DEF_  "DiagState" "No";
+BA_DEF_DEF_  "DiagUUDTResponse" "No";
+BA_DEF_DEF_  "ECU" "";
+BA_DEF_DEF_  "EE_SignalType" "UINT";
+BA_DEF_DEF_  "FctAddress" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgCycleTimeFast" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenMsgFastOnStart" 0;
+BA_DEF_DEF_  "GenMsgILSupport" "Yes";
+BA_DEF_DEF_  "GenMsgMinimumDistance" 0;
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenMsgRepetitionCount" 0;
+BA_DEF_DEF_  "GenMsgRepetitionDelay" 0;
+BA_DEF_DEF_  "GenMsgRequestable" 1;
+BA_DEF_DEF_  "GenMsgSendType" "cyclic";
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "GenSigCycleTime" 0;
+BA_DEF_DEF_  "GenSigCycleTimeActive" 0;
+BA_DEF_DEF_  "GenSigILSupport" "Yes";
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigStartValue" 0.0;
+BA_DEF_DEF_  "ILUsed" "yes";
+BA_DEF_DEF_  "IfcFct_Storage" "Configured";
+BA_DEF_DEF_  "IfcType" "None";
+BA_DEF_DEF_  "Manufacturer" "CLAAS SE GMBH";
+BA_DEF_DEF_  "NmAsrBaseAddress" 351338496;
+BA_DEF_DEF_  "NmAsrCanMsgCycleTime" 100;
+BA_DEF_DEF_  "NmAsrMessageCount" 255;
+BA_DEF_DEF_  "NmAsrNodeIdentifier" 0;
+BA_DEF_DEF_  "NmAsrRepeatMessageTime" 400;
+BA_DEF_DEF_  "NmAsrTimeoutTime" 1000;
+BA_DEF_DEF_  "NmAsrWaitBusSleepTime" 750;
+BA_DEF_DEF_  "NmJ1939AAC" 0;
+BA_DEF_DEF_  "NmJ1939ECUInstance" 0;
+BA_DEF_DEF_  "NmJ1939Function" 0;
+BA_DEF_DEF_  "NmJ1939FunctionInstance" 0;
+BA_DEF_DEF_  "NmJ1939IdentityNumber" 0;
+BA_DEF_DEF_  "NmJ1939IndustryGroup" 0;
+BA_DEF_DEF_  "NmJ1939ManufacturerCode" 0;
+BA_DEF_DEF_  "NmJ1939System" 0;
+BA_DEF_DEF_  "NmJ1939SystemInstance" 0;
+BA_DEF_DEF_  "NmStationAddress" 0;
+BA_DEF_DEF_  "NmType" "NmAsr";
+BA_DEF_DEF_  "SPN" 0;
+BA_DEF_DEF_  "SigType" "Default";
+BA_DEF_DEF_  "Sig_IfcType" "None";
+BA_DEF_DEF_  "SignalType" "Data";
+BA_DEF_DEF_  "SomeIpSendMode" "NotSet";
+BA_DEF_DEF_  "TpJ1939VarDlc" "No";
+BA_DEF_DEF_  "TpOwnSystemEcuNumber" 0;
+BA_DEF_DEF_  "UsesClaasProtocol" "NotDefined";
+BA_DEF_DEF_  "VFrameFormat" "ExtendedCAN";
+
+BA_ "BusType" "CAN";
+BA_ "DBName" "FrontLoaderCan_Tractor";
+BA_ "ECU" BU_ T_CEGB "CEGM";
+BA_ "ECU" BU_ T_CEGC "CEGM";
+BA_ "ECU" BU_ T_FLCC_CEG "CEGM";
+BA_ "ECU" BU_ T_FLMC "N_FLMM";
+BA_ "NmAsrNodeIdentifier" BU_ T_FLMC 0;
+BA_ "NmStationAddress" BU_ T_FLMC 228;
+BA_ "ECU" BU_ T_FLMS "N_FLMM";
+BA_ "NmAsrNodeIdentifier" BU_ T_FLMS 0;
+BA_ "NmStationAddress" BU_ T_FLMS 228;
+BA_ "ECU" BU_ T_HYMC_CEG "CEGM";
+BA_ "ECU" BU_ T_VBCC_CEG "CEGM";
+BA_ "ECU" BU_ T_VBMC_CEG "CEGM";
+BA_ "ECU" BU_ T_VDCC_CEG "CEGM";
+BA_ "ECU" BU_ T_VHBC_CEG "CEGM";
+BA_ "ASR_GenMsgCycleTime" BO_ 2348810468 1000;
+BA_ "ASR_GenMsgDelayTime" BO_ 2348810468 0;
+BA_ "ASR_GenMsgSendType" BO_ 2348810468 0;
+BA_ "ASR_GenMsgSigSendType" BO_ 2348810468 7;
+BA_ "ASR_GenMsgStartDelayTime" BO_ 2348810468 0;
+BA_ "ASR_GenSignalGroups" BO_ 2348810468 1;
+BA_ "FctAddress" BO_ 2348810468 0;
+BA_ "FctName" BO_ 2348810468 "FlmmAlive";
+BA_ "GenMsgCycleTime" BO_ 2348810468 1000;
+BA_ "GenMsgSendType" BO_ 2348810468 0;
+BA_ "IfcFct_Storage" BO_ 2348810468 2;
+BA_ "IfcType" BO_ 2348810468 1;
+BA_ "VFrameFormat" BO_ 2348810468 1;
+BA_ "ASR_GenMsgCycleTime" BO_ 2348877284 0;
+BA_ "ASR_GenMsgDelayTime" BO_ 2348877284 0;
+BA_ "ASR_GenMsgSendType" BO_ 2348877284 8;
+BA_ "ASR_GenMsgSigSendType" BO_ 2348877284 3;
+BA_ "ASR_GenSignalGroups" BO_ 2348877284 1;
+BA_ "FctAddress" BO_ 2348877284 1;
+BA_ "FctName" BO_ 2348877284 "Alarm";
+BA_ "GenMsgCycleTime" BO_ 2348877284 0;
+BA_ "GenMsgMinimumDistance" BO_ 2348877284 0;
+BA_ "GenMsgSendType" BO_ 2348877284 1;
+BA_ "IfcFct_Storage" BO_ 2348877284 0;
+BA_ "IfcType" BO_ 2348877284 0;
+BA_ "VFrameFormat" BO_ 2348877284 1;
+BA_ "ASR_GenMsgCycleTime" BO_ 2349203489 100;
+BA_ "ASR_GenMsgDelayTime" BO_ 2349203489 0;
+BA_ "FctAddress" BO_ 2349203489 6;
+BA_ "FctName" BO_ 2349203489 "SystemStatus";
+BA_ "GenMsgCycleTime" BO_ 2349203489 100;
+BA_ "GenMsgSendType" BO_ 2349203489 4;
+BA_ "IfcType" BO_ 2349203489 2;
+BA_ "VFrameFormat" BO_ 2349203489 1;
+BA_ "ASR_GenMsgCycleTime" BO_ 2350907397 1000;
+BA_ "ASR_GenMsgDelayTime" BO_ 2350907397 0;
+BA_ "ASR_GenMsgSendType" BO_ 2350907397 0;
+BA_ "ASR_GenMsgSigSendType" BO_ 2350907397 7;
+BA_ "ASR_GenSignalGroups" BO_ 2350907397 1;
+BA_ "FctAddress" BO_ 2350907397 32;
+BA_ "FctName" BO_ 2350907397 "MachineManagement";
+BA_ "GenMsgCycleTime" BO_ 2350907397 1000;
+BA_ "GenMsgSendType" BO_ 2350907397 0;
+BA_ "IfcFct_Storage" BO_ 2350907397 0;
+BA_ "IfcType" BO_ 2350907397 2;
+BA_ "VFrameFormat" BO_ 2350907397 1;
+BA_ "ASR_GenMsgCycleTime" BO_ 2418205702 50;
+BA_ "ASR_GenMsgDelayTime" BO_ 2418205702 0;
+BA_ "ASR_GenMsgSendType" BO_ 2418205702 0;
+BA_ "ASR_GenMsgSigSendType" BO_ 2418205702 7;
+BA_ "FctAddress" BO_ 2418205702 64;
+BA_ "FctName" BO_ 2418205702 "HydraulicState";
+BA_ "GenMsgCycleTime" BO_ 2418205702 50;
+BA_ "IfcType" BO_ 2418205702 17;
+BA_ "VFrameFormat" BO_ 2418205702 1;
+BA_ "ASR_GenMsgCycleTime" BO_ 2435020004 0;
+BA_ "ASR_GenMsgDelayTime" BO_ 2435020004 0;
+BA_ "ASR_GenMsgSendType" BO_ 2435020004 8;
+BA_ "ASR_GenMsgSigSendType" BO_ 2435020004 7;
+BA_ "FctAddress" BO_ 2435020004 35;
+BA_ "FctName" BO_ 2435020004 "FrontLoaderStatus2";
+BA_ "GenMsgCycleTime" BO_ 2435020004 0;
+BA_ "GenMsgSendType" BO_ 2435020004 1;
+BA_ "VFrameFormat" BO_ 2435020004 1;
+BA_ "ASR_GenMsgCycleTime" BO_ 2485256420 50;
+BA_ "ASR_GenMsgDelayTime" BO_ 2485256420 0;
+BA_ "ASR_GenMsgSendType" BO_ 2485256420 0;
+BA_ "ASR_GenMsgSigSendType" BO_ 2485256420 7;
+BA_ "FctAddress" BO_ 2485256420 34;
+BA_ "FctName" BO_ 2485256420 "FrontLoaderSensor";
+BA_ "GenMsgCycleTime" BO_ 2485256420 50;
+BA_ "VFrameFormat" BO_ 2485256420 1;
+BA_ "ASR_GenMsgDelayTime" BO_ 2485351652 0;
+BA_ "FctAddress" BO_ 2485351652 35;
+BA_ "FctName" BO_ 2485351652 "Rsp2";
+BA_ "GenMsgSendType" BO_ 2485351652 1;
+BA_ "IfcType" BO_ 2485351652 17;
+BA_ "VFrameFormat" BO_ 2485351652 1;
+BA_ "ASR_GenMsgDelayTime" BO_ 2485380212 0;
+BA_ "FctAddress" BO_ 2485380212 35;
+BA_ "FctName" BO_ 2485380212 "Rqst2";
+BA_ "GenMsgSendType" BO_ 2485380212 1;
+BA_ "IfcType" BO_ 2485380212 17;
+BA_ "VFrameFormat" BO_ 2485380212 1;
+BA_ "ASR_GenMsgDelayTime" BO_ 2485389028 0;
+BA_ "FctAddress" BO_ 2485389028 36;
+BA_ "FctName" BO_ 2485389028 "HydraulicRequest2";
+BA_ "GenMsgSendType" BO_ 2485389028 1;
+BA_ "IfcType" BO_ 2485389028 17;
+BA_ "VFrameFormat" BO_ 2485389028 1;
+BA_ "ASR_GenMsgCycleTime" BO_ 2487418883 1000;
+BA_ "ASR_GenMsgDelayTime" BO_ 2487418883 0;
+BA_ "ASR_GenMsgSendType" BO_ 2487418883 0;
+BA_ "ASR_GenMsgSigSendType" BO_ 2487418883 7;
+BA_ "ASR_GenSignalGroups" BO_ 2487418883 1;
+BA_ "FctAddress" BO_ 2487418883 67;
+BA_ "FctName" BO_ 2487418883 "VehicleHours";
+BA_ "GenMsgCycleTime" BO_ 2487418883 1000;
+BA_ "GenMsgSendType" BO_ 2487418883 0;
+BA_ "IfcFct_Storage" BO_ 2487418883 0;
+BA_ "IfcType" BO_ 2487418883 2;
+BA_ "VFrameFormat" BO_ 2487418883 1;
+BA_ "ASR_GenMsgCycleTime" BO_ 2487484439 1000;
+BA_ "ASR_GenMsgDelayTime" BO_ 2487484439 0;
+BA_ "ASR_GenMsgSendType" BO_ 2487484439 0;
+BA_ "ASR_GenMsgSigSendType" BO_ 2487484439 7;
+BA_ "ASR_GenMsgStartDelayTime" BO_ 2487484439 0;
+BA_ "FctAddress" BO_ 2487484439 68;
+BA_ "FctName" BO_ 2487484439 "EngineStatus";
+BA_ "GenMsgCycleTime" BO_ 2487484439 1000;
+BA_ "GenMsgSendType" BO_ 2487484439 0;
+BA_ "IfcType" BO_ 2487484439 2;
+BA_ "VFrameFormat" BO_ 2487484439 1;
+BA_ "ASR_GenMsgDelayTime" BO_ 2554455140 0;
+BA_ "FctAddress" BO_ 2554455140 65;
+BA_ "FctName" BO_ 2554455140 "ValveSettings2";
+BA_ "GenMsgSendType" BO_ 2554455140 1;
+BA_ "IfcType" BO_ 2554455140 17;
+BA_ "VFrameFormat" BO_ 2554455140 1;
+BA_ "ASR_GenMsgDelayTime" BO_ 2554520676 0;
+BA_ "FctAddress" BO_ 2554520676 66;
+BA_ "FctName" BO_ 2554520676 "ValveSettings3";
+BA_ "GenMsgSendType" BO_ 2554520676 1;
+BA_ "IfcType" BO_ 2554520676 17;
+BA_ "VFrameFormat" BO_ 2554520676 1;
+BA_ "ASR_GenSigSendType" SG_ 2348810468 ModuleAliveMsgCounter 1;
+BA_ "ASR_ValueTableName" SG_ 2348810468 ModuleAliveMsgCounter "-";
+BA_ "GenSigCycleTime" SG_ 2348810468 ModuleAliveMsgCounter 1000;
+BA_ "GenSigSendType" SG_ 2348810468 ModuleAliveMsgCounter 0;
+BA_ "Sig_IfcType" SG_ 2348810468 ModuleAliveMsgCounter 1;
+BA_ "SignalType" SG_ 2348810468 ModuleAliveMsgCounter 2;
+BA_ "ASR_GenSigSendType" SG_ 2348810468 ModuleStatus 1;
+BA_ "ASR_ValueTableName" SG_ 2348810468 ModuleStatus "Default_ModuleStatus2";
+BA_ "GenSigSendType" SG_ 2348810468 ModuleStatus 0;
+BA_ "Sig_IfcType" SG_ 2348810468 ModuleStatus 1;
+BA_ "SignalType" SG_ 2348810468 ModuleStatus 3;
+BA_ "ASR_GenSigSendType" SG_ 2348810468 FunctionalityIdent 1;
+BA_ "ASR_ValueTableName" SG_ 2348810468 FunctionalityIdent "ValueTable_1048";
+BA_ "GenSigCycleTime" SG_ 2348810468 FunctionalityIdent 1000;
+BA_ "GenSigSendType" SG_ 2348810468 FunctionalityIdent 0;
+BA_ "ASR_GenSigSendType" SG_ 2348810468 SwVersionHigh 1;
+BA_ "ASR_ValueTableName" SG_ 2348810468 SwVersionHigh "-";
+BA_ "GenSigCycleTime" SG_ 2348810468 SwVersionHigh 1000;
+BA_ "GenSigSendType" SG_ 2348810468 SwVersionHigh 0;
+BA_ "Sig_IfcType" SG_ 2348810468 SwVersionHigh 1;
+BA_ "SignalType" SG_ 2348810468 SwVersionHigh 0;
+BA_ "ASR_GenSigSendType" SG_ 2348810468 SwVersionMiddle 1;
+BA_ "ASR_ValueTableName" SG_ 2348810468 SwVersionMiddle "-";
+BA_ "GenSigSendType" SG_ 2348810468 SwVersionMiddle 0;
+BA_ "Sig_IfcType" SG_ 2348810468 SwVersionMiddle 1;
+BA_ "SignalType" SG_ 2348810468 SwVersionMiddle 0;
+BA_ "ASR_GenSigSendType" SG_ 2348810468 SwVersionLow 1;
+BA_ "ASR_ValueTableName" SG_ 2348810468 SwVersionLow "-";
+BA_ "GenSigCycleTime" SG_ 2348810468 SwVersionLow 1000;
+BA_ "GenSigSendType" SG_ 2348810468 SwVersionLow 0;
+BA_ "Sig_IfcType" SG_ 2348810468 SwVersionLow 1;
+BA_ "SignalType" SG_ 2348810468 SwVersionLow 0;
+BA_ "ASR_GenSigSendType" SG_ 2348877284 AlarmId 1;
+BA_ "ASR_ValueTableName" SG_ 2348877284 AlarmId "-";
+BA_ "GenSigSendType" SG_ 2348877284 AlarmId 1;
+BA_ "Sig_IfcType" SG_ 2348877284 AlarmId 0;
+BA_ "SignalType" SG_ 2348877284 AlarmId 4;
+BA_ "ASR_GenSigSendType" SG_ 2348877284 AlarmStatus 1;
+BA_ "ASR_ValueTableName" SG_ 2348877284 AlarmStatus "Default_AlarmStatus";
+BA_ "GenSigSendType" SG_ 2348877284 AlarmStatus 1;
+BA_ "SignalType" SG_ 2348877284 AlarmStatus 5;
+BA_ "ASR_GenSigSendType" SG_ 2348877284 AlarmMsgCounter 1;
+BA_ "ASR_ValueTableName" SG_ 2348877284 AlarmMsgCounter "-";
+BA_ "GenSigSendType" SG_ 2348877284 AlarmMsgCounter 0;
+BA_ "Sig_IfcType" SG_ 2348877284 AlarmMsgCounter 0;
+BA_ "SignalType" SG_ 2348877284 AlarmMsgCounter 2;
+BA_ "ASR_ValueTableName" SG_ 2349203489 OverallEemState "ValueTable_3357";
+BA_ "ASR_GenSigSendType" SG_ 2349203489 CrankingState 1;
+BA_ "ASR_ValueTableName" SG_ 2349203489 CrankingState "ValueTable_3305";
+BA_ "ASR_ValueTableName" SG_ 2349203489 AvailableFeedback "ValueTable_3358";
+BA_ "ASR_ValueTableName" SG_ 2349203489 DiagInhibit "ValueTable_0634";
+BA_ "ASR_ValueTableName" SG_ 2349203489 DoorPosition "ValueTable_3359";
+BA_ "ASR_ValueTableName" SG_ 2349203489 EngineSpinState "ValueTable_3360";
+BA_ "ASR_GenSigSendType" SG_ 2349203489 PhaseCountdown 1;
+BA_ "ASR_ValueTableName" SG_ 2349203489 PhaseCountdown "Default_12BitSignal";
+BA_ "GenSigSendType" SG_ 2349203489 PhaseCountdown 0;
+BA_ "ASR_GenSigSendType" SG_ 2349203489 LatchReason 0;
+BA_ "ASR_ValueTableName" SG_ 2349203489 LatchReason "ValueTable_3539";
+BA_ "ASR_GenSigSendType" SG_ 2349203489 VoltageProfile 1;
+BA_ "ASR_ValueTableName" SG_ 2349203489 VoltageProfile "ValueTable_3560";
+BA_ "ASR_GenSigSendType" SG_ 2349203489 EventCode 7;
+BA_ "ASR_ValueTableName" SG_ 2349203489 EventCode "-";
+BA_ "Sig_IfcType" SG_ 2349203489 EventCode 11;
+BA_ "ASR_GenSigSendType" SG_ 2350907397 MachineMgr_Request 1;
+BA_ "ASR_ValueTableName" SG_ 2350907397 MachineMgr_Request "ValueTable_0579";
+BA_ "GenSigSendType" SG_ 2350907397 MachineMgr_Request 0;
+BA_ "Sig_IfcType" SG_ 2350907397 MachineMgr_Request 1;
+BA_ "SignalType" SG_ 2350907397 MachineMgr_Request 1;
+BA_ "ASR_GenSigSendType" SG_ 2350907397 MachineMgr_ActionCounter 1;
+BA_ "ASR_ValueTableName" SG_ 2350907397 MachineMgr_ActionCounter "-";
+BA_ "GenSigSendType" SG_ 2350907397 MachineMgr_ActionCounter 0;
+BA_ "SignalType" SG_ 2350907397 MachineMgr_ActionCounter 1;
+BA_ "ASR_GenSigSendType" SG_ 2418205702 LiftLowerValveState 0;
+BA_ "ASR_ValueTableName" SG_ 2418205702 LiftLowerValveState "ValueTable_3525";
+BA_ "ASR_GenSigSendType" SG_ 2418205702 LiftLowerValveFlow 0;
+BA_ "ASR_ValueTableName" SG_ 2418205702 LiftLowerValveFlow "Default_8BitSignal";
+BA_ "EE_SignalType" SG_ 2418205702 LiftLowerValveFlow 3;
+BA_ "ASR_GenSigSendType" SG_ 2418205702 DumpCrowdValveState 0;
+BA_ "ASR_ValueTableName" SG_ 2418205702 DumpCrowdValveState "ValueTable_3525";
+BA_ "ASR_GenSigSendType" SG_ 2418205702 DumpCrowdValveFlow 0;
+BA_ "ASR_ValueTableName" SG_ 2418205702 DumpCrowdValveFlow "Default_8BitSignal";
+BA_ "EE_SignalType" SG_ 2418205702 DumpCrowdValveFlow 3;
+BA_ "ASR_GenSigSendType" SG_ 2418205702 HymcSeqNo_HydState 0;
+BA_ "ASR_ValueTableName" SG_ 2418205702 HymcSeqNo_HydState "-";
+BA_ "ASR_GenSigSendType" SG_ 2418205702 HymcCRC_HydState 0;
+BA_ "ASR_ValueTableName" SG_ 2418205702 HymcCRC_HydState "-";
+BA_ "ASR_GenSigSendType" SG_ 2435020004 BoomHeightActVal 0;
+BA_ "ASR_ValueTableName" SG_ 2435020004 BoomHeightActVal "ValueTable_4015";
+BA_ "ASR_GenSigSendType" SG_ 2435020004 BucketPositionActVal 0;
+BA_ "ASR_ValueTableName" SG_ 2435020004 BucketPositionActVal "ValueTable_4015";
+BA_ "EE_SignalType" SG_ 2435020004 BucketPositionActVal 1;
+BA_ "ASR_GenSigSendType" SG_ 2435020004 MaterialWeight 0;
+BA_ "ASR_ValueTableName" SG_ 2435020004 MaterialWeight "Default_16BitSignal";
+BA_ "EE_SignalType" SG_ 2435020004 MaterialWeight 1;
+BA_ "ASR_GenSigSendType" SG_ 2435020004 DeviceWeight_Accuracy 0;
+BA_ "ASR_ValueTableName" SG_ 2435020004 DeviceWeight_Accuracy "ValueTable_6135";
+BA_ "ASR_GenSigSendType" SG_ 2435020004 FlmcSeqNo_Status 0;
+BA_ "ASR_ValueTableName" SG_ 2435020004 FlmcSeqNo_Status "-";
+BA_ "ASR_GenSigSendType" SG_ 2435020004 FlmcCRC_Status 0;
+BA_ "ASR_ValueTableName" SG_ 2435020004 FlmcCRC_Status "-";
+BA_ "ASR_GenSigSendType" SG_ 2485256420 LiftPressureSensor 0;
+BA_ "ASR_ValueTableName" SG_ 2485256420 LiftPressureSensor "Default_16BitSignal";
+BA_ "EE_SignalType" SG_ 2485256420 LiftPressureSensor 3;
+BA_ "ASR_GenSigSendType" SG_ 2485256420 LowerPressureSensor 0;
+BA_ "ASR_ValueTableName" SG_ 2485256420 LowerPressureSensor "Default_16BitSignal";
+BA_ "EE_SignalType" SG_ 2485256420 LowerPressureSensor 3;
+BA_ "ASR_GenSigSendType" SG_ 2485256420 BoomAngleSensor 0;
+BA_ "ASR_ValueTableName" SG_ 2485256420 BoomAngleSensor "Default_16BitSignal";
+BA_ "EE_SignalType" SG_ 2485256420 BoomAngleSensor 3;
+BA_ "ASR_GenSigSendType" SG_ 2485256420 ToolAngleSensor 0;
+BA_ "ASR_ValueTableName" SG_ 2485256420 ToolAngleSensor "Default_16BitSignal";
+BA_ "EE_SignalType" SG_ 2485256420 ToolAngleSensor 3;
+BA_ "ASR_GenSigSendType" SG_ 2485351652 RequestType_Rsp 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 RequestType_Rsp "ValueTable_4082";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 RequestType_GenericRsp 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 RequestType_GenericRsp "ValueTable_4063";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 CalibrationMode_Rsp 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 CalibrationMode_Rsp "ValueTable_4085";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 PositionCtrlMode_Rsp 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 PositionCtrlMode_Rsp "ValueTable_4084";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 StoredData_Rsp 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 StoredData_Rsp "ValueTable_4083";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 BoomHeight_SetPoint 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 BoomHeight_SetPoint "Default_8BitSignal";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 WeightReference 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 WeightReference "Default_16BitSignal";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 BucketPosition_SetPoint 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 BucketPosition_SetPoint "Default_16BitSignal";
+BA_ "EE_SignalType" SG_ 2485351652 BucketPosition_SetPoint 1;
+BA_ "ASR_GenSigSendType" SG_ 2485351652 CRCDummy_1 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 CRCDummy_1 "-";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 CRCDummy_1 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 CRCDummy_1 "-";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 FlcmSeqNo_Rsp 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 FlcmSeqNo_Rsp "-";
+BA_ "ASR_GenSigSendType" SG_ 2485351652 FlcmCRC_Rsp 0;
+BA_ "ASR_ValueTableName" SG_ 2485351652 FlcmCRC_Rsp "-";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 RequestType_Rqst 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 RequestType_Rqst "ValueTable_4082";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 CRCDummy_2 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 CRCDummy_2 "-";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 CalibrationMode_Rqst 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 CalibrationMode_Rqst "ValueTable_4085";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 PositionCtrlMode_Rqst 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 PositionCtrlMode_Rqst "ValueTable_4084";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 StoredData_Rqst 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 StoredData_Rqst "ValueTable_4083";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 BoomHeight_SetPoint 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 BoomHeight_SetPoint "Default_8BitSignal";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 WeightReference 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 WeightReference "Default_16BitSignal";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 BucketPosition_SetPoint 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 BucketPosition_SetPoint "Default_16BitSignal";
+BA_ "EE_SignalType" SG_ 2485380212 BucketPosition_SetPoint 1;
+BA_ "ASR_GenSigSendType" SG_ 2485380212 CRCDummy_1 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 CRCDummy_1 "-";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 CRCDummy_1 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 CRCDummy_1 "-";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 FlcmSeqNo_Rqst 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 FlcmSeqNo_Rqst "-";
+BA_ "ASR_GenSigSendType" SG_ 2485380212 FlcmCRC_Rqst 0;
+BA_ "ASR_ValueTableName" SG_ 2485380212 FlcmCRC_Rqst "-";
+BA_ "ASR_GenSigSendType" SG_ 2485389028 LiftLowerValveState 0;
+BA_ "ASR_ValueTableName" SG_ 2485389028 LiftLowerValveState "ValueTable_3525";
+BA_ "ASR_GenSigSendType" SG_ 2485389028 LiftLowerValveFlow 0;
+BA_ "ASR_ValueTableName" SG_ 2485389028 LiftLowerValveFlow "Default_8BitSignal";
+BA_ "EE_SignalType" SG_ 2485389028 LiftLowerValveFlow 3;
+BA_ "ASR_GenSigSendType" SG_ 2485389028 DumpCrowdValveState 0;
+BA_ "ASR_ValueTableName" SG_ 2485389028 DumpCrowdValveState "ValueTable_3525";
+BA_ "ASR_GenSigSendType" SG_ 2485389028 DumpCrowdValveFlow 0;
+BA_ "ASR_ValueTableName" SG_ 2485389028 DumpCrowdValveFlow "Default_8BitSignal";
+BA_ "EE_SignalType" SG_ 2485389028 DumpCrowdValveFlow 3;
+BA_ "ASR_GenSigSendType" SG_ 2485389028 CRCDummy_1 0;
+BA_ "ASR_ValueTableName" SG_ 2485389028 CRCDummy_1 "-";
+BA_ "ASR_GenSigSendType" SG_ 2485389028 CRCDummy_2 0;
+BA_ "ASR_ValueTableName" SG_ 2485389028 CRCDummy_2 "-";
+BA_ "ASR_GenSigSendType" SG_ 2485389028 FlcmSeqNo_Rqst 0;
+BA_ "ASR_ValueTableName" SG_ 2485389028 FlcmSeqNo_Rqst "-";
+BA_ "ASR_GenSigSendType" SG_ 2485389028 FlcmCRC_Rqst 0;
+BA_ "ASR_ValueTableName" SG_ 2485389028 FlcmCRC_Rqst "-";
+BA_ "ASR_GenSigSendType" SG_ 2487418883 TotalVehicleHours 1;
+BA_ "ASR_ValueTableName" SG_ 2487418883 TotalVehicleHours "Default_32BitSignal";
+BA_ "GenSigSendType" SG_ 2487418883 TotalVehicleHours 0;
+BA_ "Sig_IfcType" SG_ 2487418883 TotalVehicleHours 2;
+BA_ "SignalType" SG_ 2487418883 TotalVehicleHours 0;
+BA_ "ASR_GenSigSendType" SG_ 2487484439 EngineRpmSignalActVal 7;
+BA_ "ASR_ValueTableName" SG_ 2487484439 EngineRpmSignalActVal "Default_16BitSignal";
+BA_ "EE_SignalType" SG_ 2487484439 EngineRpmSignalActVal 3;
+BA_ "GenSigSendType" SG_ 2487484439 EngineRpmSignalActVal 0;
+BA_ "Sig_IfcType" SG_ 2487484439 EngineRpmSignalActVal 11;
+BA_ "SignalType" SG_ 2487484439 EngineRpmSignalActVal 0;
+BA_ "ASR_GenSigSendType" SG_ 2554455140 LiftLowerValveExtendedFlowMax 0;
+BA_ "ASR_ValueTableName" SG_ 2554455140 LiftLowerValveExtendedFlowMax "Default_8BitSignal";
+BA_ "EE_SignalType" SG_ 2554455140 LiftLowerValveExtendedFlowMax 3;
+BA_ "ASR_GenSigSendType" SG_ 2554455140 LiftLowerValveRetractFlowMax 0;
+BA_ "ASR_ValueTableName" SG_ 2554455140 LiftLowerValveRetractFlowMax "Default_8BitSignal";
+BA_ "EE_SignalType" SG_ 2554455140 LiftLowerValveRetractFlowMax 3;
+BA_ "ASR_GenSigSendType" SG_ 2554455140 DumpCrowdValveExtendedFlowMax 0;
+BA_ "ASR_ValueTableName" SG_ 2554455140 DumpCrowdValveExtendedFlowMax "Default_8BitSignal";
+BA_ "EE_SignalType" SG_ 2554455140 DumpCrowdValveExtendedFlowMax 3;
+BA_ "ASR_GenSigSendType" SG_ 2554455140 DumpCrowdValveRetractFlowMax 0;
+BA_ "ASR_ValueTableName" SG_ 2554455140 DumpCrowdValveRetractFlowMax "Default_8BitSignal";
+BA_ "EE_SignalType" SG_ 2554455140 DumpCrowdValveRetractFlowMax 3;
+BA_ "ASR_GenSigSendType" SG_ 2554455140 DumpCrowdValveProgressivity 0;
+BA_ "ASR_ValueTableName" SG_ 2554455140 DumpCrowdValveProgressivity "ValueTable_4086";
+BA_ "ASR_GenSigSendType" SG_ 2554455140 LiftLowerValveProgressivity 0;
+BA_ "ASR_ValueTableName" SG_ 2554455140 LiftLowerValveProgressivity "ValueTable_4086";
+BA_ "ASR_GenSigSendType" SG_ 2554455140 HymcSeqNo_ValveSetting2 0;
+BA_ "ASR_ValueTableName" SG_ 2554455140 HymcSeqNo_ValveSetting2 "-";
+BA_ "ASR_GenSigSendType" SG_ 2554455140 HymcCRC_ValveSetting2 0;
+BA_ "ASR_ValueTableName" SG_ 2554455140 HymcCRC_ValveSetting2 "-";
+BA_ "ASR_GenSigSendType" SG_ 2554520676 ConfigHydPumpCapacity 0;
+BA_ "ASR_ValueTableName" SG_ 2554520676 ConfigHydPumpCapacity "ValueTable_6014";
+BA_ "ASR_GenSigSendType" SG_ 2554520676 EstimatedHydPumpFlow 0;
+BA_ "ASR_ValueTableName" SG_ 2554520676 EstimatedHydPumpFlow "Default_8BitSignal";
+BA_ "ASR_GenSigSendType" SG_ 2554520676 CRCDummy_1 0;
+BA_ "ASR_ValueTableName" SG_ 2554520676 CRCDummy_1 "-";
+BA_ "ASR_GenSigSendType" SG_ 2554520676 CRCDummy_2 0;
+BA_ "ASR_ValueTableName" SG_ 2554520676 CRCDummy_2 "-";
+BA_ "ASR_GenSigSendType" SG_ 2554520676 CRCDummy_3 0;
+BA_ "ASR_ValueTableName" SG_ 2554520676 CRCDummy_3 "-";
+BA_ "ASR_GenSigSendType" SG_ 2554520676 CRCDummy_4 0;
+BA_ "ASR_ValueTableName" SG_ 2554520676 CRCDummy_4 "-";
+BA_ "ASR_GenSigSendType" SG_ 2554520676 HymcSeqNo_ValveSetting3 0;
+BA_ "ASR_ValueTableName" SG_ 2554520676 HymcSeqNo_ValveSetting3 "-";
+BA_ "ASR_GenSigSendType" SG_ 2554520676 HymcCRC_ValveSetting3 0;
+BA_ "ASR_ValueTableName" SG_ 2554520676 HymcCRC_ValveSetting3 "-";
+
+
+VAL_ 2348810468 ModuleStatus 0 "Module_Initialisation" 1 "Module_Active" 32 "Module_PreparingShutdown" 33 "Module_ShutdownPossible" 34 "Module_Shutdown" 253 "NeedStartmessage" 254 "Error" 255 "NotAvailable"; 
+VAL_ 2348810468 FunctionalityIdent 1 "CombineHarvester" 2 "ForageHarverster" 253 "NeedStartmessage" 254 "Error" 255 "NotAvailable"; 
+VAL_ 2348877284 AlarmStatus 0 "AlarmOff" 1 "AlarmOn" 254 "Error" 255 "NotAvailable"; 
+VAL_ 2349203489 OverallEemState 0 "PowersourceImminentShutdown" 1 "PowersourcePendingShutdown" 2 "FullSleep" 3 "PartialSleep" 4 "HiddenWakeUp" 5 "OverallWakeUp" 8 "ReadyToStartEngine" 9 "EnginePreStart" 10 "EngineStart" 11 "EnginePostStart" 16 "GeneratorOn" 17 "GeneratorOnHighLoad" 22 "ControlledEngineStalled" 23 "EngineStalled" 24 "GoToStop" 25 "GoToSleep" 26 "ReadyToSleep" 28 "ShutdownWakeUp" 29 "GhostWakeUp" 30 "Error" 31 "NotAvailable"; 
+VAL_ 2349203489 CrankingState 0 "NotReady" 1 "Ready" 2 "Pending" 3 "Done" 4 "Interrupted" 5 "OverspeedStop" 6 "OvertemperatureStop" 7 "OvertimeStop" 8 "ConditionLossStop" 9 "HardwareFailureStop" 10 "RotorBlockedStop" 11 "WrongConditionStop" 12 "DoneConfirmed" 13 "RecoverPending" 14 "RecoverConfirmed" 15 "StalledStop" 16 "WarmRecoverConfirmed" 30 "Error" 31 "NotAvailable"; 
+VAL_ 2349203489 AvailableFeedback 0 "None" 1 "Full" 2 "TerminalNotAvailable" 3 "DashboarTerminalNotAvailable" 4 "DashboarTerminalDisplayingPartially" 5 "DashboarTerminalDisplayNotAvailable" 6 "Error" 7 "NotAvailable"; 
+VAL_ 2349203489 DiagInhibit 0 "Allowed" 1 "NotAllowed" 2 "Error" 3 "NotAvailable"; 
+VAL_ 2349203489 DoorPosition 0 "Closed" 1 "Opened" 2 "Error" 3 "NotAvailable"; 
+VAL_ 2349203489 EngineSpinState 0 "Stopped" 1 "Stalled" 2 "RunningAutonomously" 3 "RunningNotAutonomously" 4 "Underspeed" 5 "CriticalUnderspeed" 6 "Overspeed" 7 "CriticalOverspeed" 8 "GoToStop" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2349203489 PhaseCountdown 4094 "Error" 4095 "NotAvailable"; 
+VAL_ 2349203489 LatchReason 0 "None" 1 "Variant" 2 "WarningLight" 3 "TrailerBreak" 4 "Engine" 5 "MovingVehicle" 12 "Multiple" 13 "Miscellaneous" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2349203489 VoltageProfile 0 "Fail" 1 "Drop" 2 "StableSharp" 3 "StableLarge" 4 "Raise" 5 "Jump" 13 "Unstable" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2350907397 MachineMgr_Request 0 "NoRequest" 1 "TransmitVersion" 2 "PrepareForShutdown" 3 "ExecuteShutdown" 4 "Reset" 5 "Startup" 254 "Error" 255 "NotAvailable"; 
+VAL_ 2418205702 LiftLowerValveState 0 "Neutral" 1 "Extend" 2 "Retract" 3 "Float" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2418205702 LiftLowerValveFlow 254 "Error" 255 "NotAvailable"; 
+VAL_ 2418205702 DumpCrowdValveState 0 "Neutral" 1 "Extend" 2 "Retract" 3 "Float" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2418205702 DumpCrowdValveFlow 254 "Error" 255 "NotAvailable"; 
+VAL_ 2435020004 BoomHeightActVal 253 "Error_min" 254 "Error_max" 255 "NotAvailable"; 
+VAL_ 2435020004 BucketPositionActVal 65024 "Error_min" 65279 "Error_max" 65535 "NotAvailable"; 
+VAL_ 2435020004 MaterialWeight 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2435020004 DeviceWeight_Accuracy 253 "Invalid_Cond" 254 "Error" 255 "NotAvailable"; 
+VAL_ 2485256420 LiftPressureSensor 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2485256420 LowerPressureSensor 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2485256420 BoomAngleSensor 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2485256420 ToolAngleSensor 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2485351652 RequestType_Rsp 0 "StoredData" 2 "PositionControlMode" 3 "CalibrationMode"; 
+VAL_ 2485351652 RequestType_GenericRsp 0 "Accepted" 1 "Rejected" 2 "Ongoing" 3 "Step1_Done" 4 "Step2_Done" 5 "Abort" 6 "NOK_CONDITION_FAULT" 255 "NotAvailable"; 
+VAL_ 2485351652 CalibrationMode_Rsp 0 "None" 1 "Start_Calib_Sensor_Limit_Up" 2 "Stop_Calib_Sensor_Limit_Up" 3 "Abort_Calib_Sensor_Limit_Up" 4 "Start_Calib_Sensor_Limit_Down" 5 "Stop_Calib_Sensor_Limit_Down" 6 "Abort_Calib_Sensor_Limit_Down" 7 "Launch_Calib_Weighting" 8 "Start_Calib_Weighing_Step_1" 9 "Calib_Weighing_Step_1_Done" 10 "Calib_Weighing_Step_1_Abort" 11 "Start_Calib_Weighing_Step_2" 12 "Calib_Weighing_Step_2_Done" 13 "Calib_Weighing_Step_2_Abort" 255 "NotAvailable"; 
+VAL_ 2485351652 PositionCtrlMode_Rsp 0 "NoRequest" 1 "reserved1" 2 "WorkingDown" 3 "Neutral" 4 "AutoLevel" 5 "reserved2" 6 "Up_Position" 7 "Down_Position" 255 "NotAvailable"; 
+VAL_ 2485351652 StoredData_Rsp 0 "None" 7 "Tare" 8 "GroundReference" 255 "NotAvailable"; 
+VAL_ 2485351652 BoomHeight_SetPoint 254 "Error" 255 "NotAvailable"; 
+VAL_ 2485351652 WeightReference 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2485351652 BucketPosition_SetPoint 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2485380212 RequestType_Rqst 0 "StoredData" 2 "PositionControlMode" 3 "CalibrationMode"; 
+VAL_ 2485380212 CalibrationMode_Rqst 0 "None" 1 "Start_Calib_Sensor_Limit_Up" 2 "Stop_Calib_Sensor_Limit_Up" 3 "Abort_Calib_Sensor_Limit_Up" 4 "Start_Calib_Sensor_Limit_Down" 5 "Stop_Calib_Sensor_Limit_Down" 6 "Abort_Calib_Sensor_Limit_Down" 7 "Launch_Calib_Weighting" 8 "Start_Calib_Weighing_Step_1" 9 "Calib_Weighing_Step_1_Done" 10 "Calib_Weighing_Step_1_Abort" 11 "Start_Calib_Weighing_Step_2" 12 "Calib_Weighing_Step_2_Done" 13 "Calib_Weighing_Step_2_Abort" 255 "NotAvailable";
+VAL_ 2485380212 PositionCtrlMode_Rqst 0 "NoRequest" 1 "reserved1" 2 "WorkingDown" 3 "Neutral" 4 "AutoLevel" 5 "reserved2" 6 "Up_Position" 7 "Down_Position" 255 "NotAvailable"; 
+VAL_ 2485380212 StoredData_Rqst 0 "None" 7 "Tare" 8 "GroundReference" 255 "NotAvailable"; 
+VAL_ 2485380212 BoomHeight_SetPoint 254 "Error" 255 "NotAvailable"; 
+VAL_ 2485380212 WeightReference 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2485380212 BucketPosition_SetPoint 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2485389028 LiftLowerValveState 0 "Neutral" 1 "Extend" 2 "Retract" 3 "Float" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2485389028 LiftLowerValveFlow 254 "Error" 255 "NotAvailable"; 
+VAL_ 2485389028 DumpCrowdValveState 0 "Neutral" 1 "Extend" 2 "Retract" 3 "Float" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2485389028 DumpCrowdValveFlow 254 "Error" 255 "NotAvailable"; 
+VAL_ 2487418883 TotalVehicleHours -33554432 "Error_Min" -16777217 "Error_Max" -1 "NotAvailable"; 
+VAL_ 2487484439 EngineRpmSignalActVal 65024 "Error_Min" 65279 "Error_Max" 65535 "NotAvailable"; 
+VAL_ 2554455140 LiftLowerValveExtendedFlowMax 254 "Error" 255 "NotAvailable"; 
+VAL_ 2554455140 LiftLowerValveRetractFlowMax 254 "Error" 255 "NotAvailable"; 
+VAL_ 2554455140 DumpCrowdValveExtendedFlowMax 254 "Error" 255 "NotAvailable"; 
+VAL_ 2554455140 DumpCrowdValveRetractFlowMax 254 "Error" 255 "NotAvailable"; 
+VAL_ 2554455140 DumpCrowdValveProgressivity 0 "Low" 1 "Medium" 2 "High" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2554455140 LiftLowerValveProgressivity 0 "Low" 1 "Medium" 2 "High" 14 "Error" 15 "NotAvailable"; 
+VAL_ 2554520676 ConfigHydPumpCapacity 0 "110l_min" 1 "150l_min" 2 "205l_min" 3 "220l_min" 4 "270l_min" 15 "NotAvailable"; 
+VAL_ 2554520676 EstimatedHydPumpFlow 254 "Error" 255 "NotAvailable"; 
+
+
+
+

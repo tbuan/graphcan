@@ -17,3 +17,13 @@ export interface ChartConfig {
   signals: Signal[]
   displayMode: DisplayMode
 }
+
+export type AnalysisPanelSource =
+  | { kind: 'byte';   byteIndex: number }
+  | { kind: 'signal'; signalName: string }
+
+export interface AnalysisPanel {
+  uid: string
+  id: string
+  source: AnalysisPanelSource
+}

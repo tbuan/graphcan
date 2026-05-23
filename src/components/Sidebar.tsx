@@ -1,18 +1,20 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { parseTimestampToMs } from '../utils/time'
 import { getMessageLabel } from '../utils/dbc'
-import type { ImportedFile, Signal } from '../types'
+import type { ImportedFile, Signal, AnalysisPanelSource } from '../types'
 import type { DbcData } from '../parsers/dbc'
 
 interface SidebarProps {
   importedFile: ImportedFile | null
   dbcData: DbcData | null
   onAddSignal: (signal: Signal) => void
+  onAddPanel: (id: string, source: AnalysisPanelSource) => void
 }
 
-function Sidebar({ importedFile, dbcData, onAddSignal }: SidebarProps) {
+function Sidebar({ importedFile, dbcData, onAddSignal, onAddPanel }: SidebarProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const duration = useMemo(() => {
@@ -36,9 +38,20 @@ function Sidebar({ importedFile, dbcData, onAddSignal }: SidebarProps) {
       .sort((a, b) => a.id.localeCompare(b.id))
   }, [importedFile])
 
+  const isAnalysis = location.pathname === '/analysis'
+
   function handleAddByte(id: string, byteIndex: number) {
-    onAddSignal({ id, byteIndex })
-    navigate('/chart')
+    if (isAnalysis) {
+      onAddPanel(id, { kind: 'byte', byteIndex })
+    } else {
+      onAddSignal({ id, byteIndex })
+      navigate('/chart')
+    }
+    setExpandedId(null)
+  }
+
+  function handleAddDbcSignal(id: string, signalName: string) {
+    onAddPanel(id, { kind: 'signal', signalName })
     setExpandedId(null)
   }
 
@@ -107,19 +120,36 @@ function Sidebar({ importedFile, dbcData, onAddSignal }: SidebarProps) {
                   {expandedId === id ? '×' : '+'}
                 </button>
               </div>
-              {expandedId === id && (
-                <div className="sidebar-byte-picker">
-                  {Array.from({ length: dlc }, (_, b) => (
-                    <button
-                      key={b}
-                      className="sidebar-byte-btn"
-                      onClick={() => handleAddByte(id, b)}
-                    >
-                      B{b}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {expandedId === id && (() => {
+                const dbcSignals = isAnalysis ? (dbcData?.[id]?.signals ?? []) : []
+                return dbcSignals.length > 0 ? (
+                  <div className="sidebar-signal-picker">
+                    {dbcSignals.map(s => (
+                      <button
+                        key={s.name}
+                        className="sidebar-signal-btn"
+                        onClick={() => handleAddDbcSignal(id, s.name)}
+                      >
+                        {s.name}
+                        {s.mux?.kind === 'switch' && <span className="signal-mux-badge">MUX</span>}
+                        {s.mux?.kind === 'muxed'  && <span className="signal-mux-badge">m{s.mux.id}</span>}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="sidebar-byte-picker">
+                    {Array.from({ length: dlc }, (_, b) => (
+                      <button
+                        key={b}
+                        className="sidebar-byte-btn"
+                        onClick={() => handleAddByte(id, b)}
+                      >
+                        B{b}
+                      </button>
+                    ))}
+                  </div>
+                )
+              })()}
             </li>
           ))}
         </ul>

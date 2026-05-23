@@ -5,10 +5,11 @@ import Sidebar from './components/Sidebar'
 import NavTabs from './components/NavTabs'
 import TableView from './views/TableView'
 import ChartView from './views/ChartView'
+import AnalysisView from './views/AnalysisView'
 import { parseBusmasterLog } from './parsers/busmaster'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
 import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig } from './utils/storage'
-import type { ImportedFile, ChartConfig } from './types'
+import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
 import './App.css'
 
 const DEFAULT_CHART_CONFIG: ChartConfig = { signals: [], displayMode: 'line' }
@@ -20,6 +21,7 @@ function App() {
   const [chartConfig, setChartConfig]   = useState<ChartConfig>(
     () => loadChartConfig() ?? DEFAULT_CHART_CONFIG
   )
+  const [analysisPanels, setAnalysisPanels] = useState<AnalysisPanel[]>([])
 
   // Restore persisted data on mount
   useEffect(() => {
@@ -59,6 +61,17 @@ function App() {
     clearDbcFile()
   }
 
+  function handleAddPanel(id: string, source: AnalysisPanelSource) {
+    setAnalysisPanels(prev => [
+      ...prev,
+      { uid: `${id}-${Date.now()}`, id, source },
+    ])
+  }
+
+  function handleRemovePanel(uid: string) {
+    setAnalysisPanels(prev => prev.filter(p => p.uid !== uid))
+  }
+
   return (
     <BrowserRouter>
       <div className="app">
@@ -80,6 +93,7 @@ function App() {
                 return { ...prev, signals: [...prev.signals, signal] }
               })
             }}
+            onAddPanel={handleAddPanel}
           />
           <main className="main-content">
             <Routes>
@@ -87,6 +101,9 @@ function App() {
               <Route path="/table" element={<TableView importedFile={importedFile} dbcData={dbcData} />} />
               <Route path="/chart" element={
                 <ChartView importedFile={importedFile} dbcData={dbcData} config={chartConfig} onConfigChange={setChartConfig} />
+              } />
+              <Route path="/analysis" element={
+                <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} onRemovePanel={handleRemovePanel} />
               } />
             </Routes>
           </main>

@@ -35,3 +35,35 @@ export function decodeSignal(data: number[], signal: DbcSignal): number {
 
   return rawValue * signal.factor + signal.offset
 }
+
+// Returns the raw integer value (before factor/offset) — used to read mux switch IDs.
+export function decodeRawInt(data: number[], signal: DbcSignal): number {
+  let rawValue = 0
+
+  if (signal.isLittleEndian ?? true) {
+    for (let i = 0; i < signal.length; i++) {
+      const bitPos = signal.startBit + i
+      const byteIdx = bitPos >> 3
+      const bitIdx  = bitPos & 7
+      if (byteIdx < data.length && (data[byteIdx] >> bitIdx) & 1) {
+        rawValue += 2 ** i
+      }
+    }
+  } else {
+    let bitPos = signal.startBit
+    for (let i = signal.length - 1; i >= 0; i--) {
+      const byteIdx = bitPos >> 3
+      const bitIdx  = bitPos & 7
+      if (byteIdx < data.length && (data[byteIdx] >> bitIdx) & 1) {
+        rawValue += 2 ** i
+      }
+      bitPos = bitIdx === 0 ? bitPos + 15 : bitPos - 1
+    }
+  }
+
+  if (signal.isSigned && rawValue >= 2 ** (signal.length - 1)) {
+    rawValue -= 2 ** signal.length
+  }
+
+  return rawValue
+}

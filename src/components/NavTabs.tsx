@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom'
 
 const TABS = [
-  { path: '/table', label: 'Table' },
-  { path: '/chart', label: 'Chart' },
+  { path: '/table',    label: 'Table'    },
+  { path: '/chart',    label: 'Chart'    },
+  { path: '/analysis', label: 'Analysis' },
 ]
 
 function NavTabs() {

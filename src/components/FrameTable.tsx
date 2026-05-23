@@ -3,7 +3,7 @@ import type { CanFrame } from '../parsers/busmaster'
 import type { DbcData } from '../parsers/dbc'
 import { parseTimestampToMs, formatDelta } from '../utils/time'
 import { getMessageLabel, getMessageName } from '../utils/dbc'
-import { decodeSignal } from '../utils/decodeSignal'
+import { decodeSignal, decodeRawInt } from '../utils/decodeSignal'
 
 interface FrameTableProps {
   frames: CanFrame[]
@@ -37,6 +37,7 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
   const [selectedA, setSelectedA] = useState<number | null>(null)
   const [selectedB, setSelectedB] = useState<number | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
+  const [displayHex, setDisplayHex]     = useState(true)
   const filterRef = useRef<HTMLDivElement>(null)
 
   // Close filter panel when clicking outside
@@ -159,7 +160,16 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
           </span>
         </div>
 
-        <div className="frame-table-controls" ref={filterRef}>
+        <div className="frame-table-right-controls">
+          <button
+            className={`btn-hex-toggle ${displayHex ? 'active' : ''}`}
+            onClick={() => setDisplayHex(v => !v)}
+            title="Toggle hex / decimal display"
+          >
+            {displayHex ? 'HEX' : 'DEC'}
+          </button>
+
+          <div className="frame-table-controls" ref={filterRef}>
           <button className="btn-filter" onClick={() => setFilterOpen(o => !o)}>
             IDs ({visibleIds.size}/{uniqueIds.length}) ▾
           </button>
@@ -190,6 +200,7 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
               </ul>
             </div>
           )}
+          </div>
         </div>
       </div>
 
@@ -261,30 +272,59 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
                     <td>{frame.channel}</td>
                     <td className="cell-mono cell-id" title={frame.id}>{getMessageName(frame.id, dbcData)}</td>
                     <td>{frame.dlc}</td>
-                    <td className="cell-mono cell-data">{frame.data.join(' ')}</td>
+                    <td className="cell-mono cell-data">
+                      {displayHex
+                        ? frame.data.join(' ')
+                        : frame.data.map(b => parseInt(b, 16)).join(' ')}
+                    </td>
                   </tr>
-                  {isExpanded && message && (
-                    <tr className="row-signals">
-                      <td colSpan={7}>
-                        <div className="signal-decode-grid">
-                          {message.signals.map(signal => {
-                            const bytes = frame.data.map(b => parseInt(b, 16))
-                            const value = decodeSignal(bytes, signal)
-                            const formatted = isFinite(value)
-                              ? parseFloat(value.toPrecision(6)).toString()
-                              : '—'
-                            return (
-                              <div key={signal.name} className="signal-decode-item">
-                                <span className="signal-decode-name">{signal.name}</span>
-                                <span className="signal-decode-value">{formatted}</span>
-                                {signal.unit && <span className="signal-decode-unit">{signal.unit}</span>}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
+                  {isExpanded && message && (() => {
+                    const bytes = frame.data.map(b => parseInt(b, 16))
+                    const switchSignal = message.signals.find(s => s.mux?.kind === 'switch')
+                    const activeMuxId = switchSignal ? decodeRawInt(bytes, switchSignal) : null
+                    const visibleSignals = message.signals.filter(s => {
+                      if (!s.mux) return true
+                      if (s.mux.kind === 'switch') return true
+                      return activeMuxId !== null && s.mux.id === activeMuxId
+                    })
+                    return (
+                      <tr className="row-signals">
+                        <td colSpan={7}>
+                          <div className="signal-decode-grid">
+                            {visibleSignals.map(signal => {
+                              const raw = decodeRawInt(bytes, signal)
+                              const label = signal.values?.[raw]
+                              let formatted: string
+                              let unit: string | null = null
+
+                              if (displayHex) {
+                                formatted = `0x${raw.toString(16).toUpperCase()}`
+                              } else if (label !== undefined) {
+                                formatted = label
+                              } else {
+                                const value = decodeSignal(bytes, signal)
+                                formatted = isFinite(value)
+                                  ? parseFloat(value.toPrecision(6)).toString()
+                                  : '—'
+                                unit = signal.unit || null
+                              }
+
+                              return (
+                                <div key={signal.name} className="signal-decode-item" title={label && displayHex ? label : undefined}>
+                                  <span className="signal-decode-name">{signal.name}</span>
+                                  <span className="signal-decode-value">{formatted}</span>
+                                  {unit && <span className="signal-decode-unit">{unit}</span>}
+                                  {label && displayHex && (
+                                    <span className="signal-decode-label">{label}</span>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })()}
                 </Fragment>
               )
             })}
