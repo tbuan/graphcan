@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import type { CanFrame } from '../parsers/busmaster'
+import { parseTimestampToMs, formatDelta } from '../utils/time'
 
 interface FrameTableProps {
   frames: CanFrame[]
@@ -20,18 +21,6 @@ interface IndexedFrame {
   originalIndex: number
 }
 
-// Last field is in 0.1ms units (BUSMASTER format)
-function parseTimestampToMs(ts: string): number {
-  const [h, m, s, frac] = ts.split(':').map(Number)
-  return (h * 3600 + m * 60 + s) * 1000 + frac / 10
-}
-
-function formatDelta(ms: number): string {
-  const abs = Math.abs(ms)
-  if (abs < 1) return `${(abs * 1000).toFixed(0)} µs`
-  if (abs < 1000) return `${abs.toFixed(3)} ms`
-  return `${(abs / 1000).toFixed(3)} s`
-}
 
 const MAX_DISPLAYED_FRAMES = 2000
 
