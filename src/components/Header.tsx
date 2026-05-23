@@ -2,12 +2,13 @@ import { useRef } from 'react'
 
 interface HeaderProps {
   onFileImport: (content: string, filename: string) => void
+  onBinaryImport: (buffer: ArrayBuffer, filename: string) => void
   onDbcImport: (content: string, filename: string) => void
   dbcName: string | null
   onDbcClear: () => void
 }
 
-function readFile(file: File): Promise<string> {
+function readFileAsText(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = e => resolve(e.target?.result as string)
@@ -16,21 +17,35 @@ function readFile(file: File): Promise<string> {
   })
 }
 
-function Header({ onFileImport, onDbcImport, dbcName, onDbcClear }: HeaderProps) {
+function readFileAsBuffer(file: File): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = e => resolve(e.target?.result as ArrayBuffer)
+    reader.onerror = reject
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+function Header({ onFileImport, onBinaryImport, onDbcImport, dbcName, onDbcClear }: HeaderProps) {
   const logInputRef = useRef<HTMLInputElement>(null)
   const dbcInputRef = useRef<HTMLInputElement>(null)
 
   async function handleLogChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    onFileImport(await readFile(file), file.name)
+    const ext = file.name.split('.').pop()?.toLowerCase()
+    if (ext === 'blf') {
+      onBinaryImport(await readFileAsBuffer(file), file.name)
+    } else {
+      onFileImport(await readFileAsText(file), file.name)
+    }
     e.target.value = ''
   }
 
   async function handleDbcChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    onDbcImport(await readFile(file), file.name)
+    onDbcImport(await readFileAsText(file), file.name)
     e.target.value = ''
   }
 
@@ -56,7 +71,7 @@ function Header({ onFileImport, onDbcImport, dbcName, onDbcClear }: HeaderProps)
           Import CAN log
         </button>
 
-        <input ref={logInputRef} type="file" accept=".asc,.csv,.trc,.log"
+        <input ref={logInputRef} type="file" accept=".asc,.csv,.trc,.log,.blf"
           onChange={handleLogChange} style={{ display: 'none' }} />
         <input ref={dbcInputRef} type="file" accept=".dbc"
           onChange={handleDbcChange} style={{ display: 'none' }} />

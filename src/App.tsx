@@ -6,7 +6,8 @@ import NavTabs from './components/NavTabs'
 import TableView from './views/TableView'
 import ChartView from './views/ChartView'
 import AnalysisView from './views/AnalysisView'
-import { parseBusmasterLog } from './parsers/busmaster'
+import { parseCanLog } from './parsers/parseCanLog'
+import { parseBlf } from './parsers/blf'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
 import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig } from './utils/storage'
 import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
@@ -27,7 +28,7 @@ function App() {
   useEffect(() => {
     loadFile().then(stored => {
       if (!stored) return
-      setImportedFile({ name: stored.name, result: parseBusmasterLog(stored.content), importKey: 1 })
+      setImportedFile({ name: stored.name, result: parseCanLog(stored.content, stored.name), importKey: 1 })
     })
     loadDbcFile().then(stored => {
       if (!stored) return
@@ -42,11 +43,20 @@ function App() {
   function handleFileImport(content: string, filename: string) {
     setImportedFile(prev => ({
       name: filename,
-      result: parseBusmasterLog(content),
+      result: parseCanLog(content, filename),
       importKey: (prev?.importKey ?? 0) + 1,
     }))
     setChartConfig(prev => ({ ...prev, signals: [] }))
     saveFile(filename, content)
+  }
+
+  function handleBinaryImport(buffer: ArrayBuffer, filename: string) {
+    setImportedFile(prev => ({
+      name: filename,
+      result: parseBlf(new Uint8Array(buffer)),
+      importKey: (prev?.importKey ?? 0) + 1,
+    }))
+    setChartConfig(prev => ({ ...prev, signals: [] }))
   }
 
   function handleDbcImport(content: string, filename: string) {
@@ -77,6 +87,7 @@ function App() {
       <div className="app">
         <Header
           onFileImport={handleFileImport}
+          onBinaryImport={handleBinaryImport}
           onDbcImport={handleDbcImport}
           dbcName={dbcName}
           onDbcClear={handleDbcClear}
