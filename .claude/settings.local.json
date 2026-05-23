@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"c:\\\\Users\\\\tbuan\\\\GraphCan\"; Get-ChildItem graphcan-tmp | ForEach-Object { Move-Item $_.FullName . -Force }; Remove-Item graphcan-tmp -Recurse -Force)"
+    ]
+  }
+}
