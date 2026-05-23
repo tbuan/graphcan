@@ -5,8 +5,8 @@ import type { DisplayMode, Signal } from '../types'
 import { BYTE_COLORS } from '../utils/chartColors'
 
 const THEME = {
-  border:    '#2a2d3a',
-  textMuted: '#6b7280',
+  border:    '#D5D3CE',
+  textMuted: '#89877F',
 }
 
 interface UPlotChartProps {

@@ -8,8 +8,8 @@ import { getMessageName } from '../utils/dbc'
 import { buildUPlotData, buildDbcSignalData } from '../utils/buildChartData'
 
 const THEME = {
-  border:    '#2a2d3a',
-  textMuted: '#6b7280',
+  border:    '#D5D3CE',
+  textMuted: '#89877F',
 }
 
 interface SignalPanelProps {
