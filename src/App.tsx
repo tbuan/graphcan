@@ -8,6 +8,7 @@ import './App.css'
 interface ImportedFile {
   name: string
   result: ParseResult
+  importKey: number
 }
 
 function App() {
@@ -15,7 +16,11 @@ function App() {
 
   function handleFileImport(content: string, filename: string) {
     const result = parseBusmasterLog(content)
-    setImportedFile({ name: filename, result })
+    setImportedFile(prev => ({
+      name: filename,
+      result,
+      importKey: (prev?.importKey ?? 0) + 1,
+    }))
   }
 
   return (
@@ -26,6 +31,7 @@ function App() {
         <main className="main-content">
           {importedFile ? (
             <FrameTable
+              key={importedFile.importKey}
               frames={importedFile.result.frames}
               filename={importedFile.name}
               skippedLines={importedFile.result.skippedLines}
