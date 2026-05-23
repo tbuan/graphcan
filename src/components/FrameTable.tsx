@@ -1,11 +1,14 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import type { CanFrame } from '../parsers/busmaster'
+import type { DbcData } from '../parsers/dbc'
 import { parseTimestampToMs, formatDelta } from '../utils/time'
+import { getMessageLabel, getMessageName } from '../utils/dbc'
 
 interface FrameTableProps {
   frames: CanFrame[]
   filename: string
   skippedLines: number
+  dbcData: DbcData | null
 }
 
 type SortColumn = 'timestamp' | 'direction' | 'id' | 'dlc'
@@ -24,7 +27,7 @@ interface IndexedFrame {
 
 const MAX_DISPLAYED_FRAMES = 2000
 
-function FrameTable({ frames, filename, skippedLines }: FrameTableProps) {
+function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps) {
   const [visibleIds, setVisibleIds] = useState<Set<string>>(
     () => new Set(frames.map(f => f.id))
   )
@@ -169,7 +172,7 @@ function FrameTable({ frames, filename, skippedLines }: FrameTableProps) {
                           return next
                         })}
                       />
-                      <span className="filter-id-value">{id}</span>
+                      <span className="filter-id-value">{getMessageLabel(id, dbcData)}</span>
                       <span className="filter-id-count">{idCounts[id]}</span>
                     </label>
                   </li>
@@ -231,7 +234,7 @@ function FrameTable({ frames, filename, skippedLines }: FrameTableProps) {
                     {frame.direction}
                   </td>
                   <td>{frame.channel}</td>
-                  <td className="cell-mono cell-id">{frame.id}</td>
+                  <td className="cell-mono cell-id" title={frame.id}>{getMessageName(frame.id, dbcData)}</td>
                   <td>{frame.dlc}</td>
                   <td className="cell-mono cell-data">{frame.data.join(' ')}</td>
                 </tr>

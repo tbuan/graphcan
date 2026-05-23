@@ -1,11 +1,13 @@
 import FrameTable from '../components/FrameTable'
 import type { ImportedFile } from '../types'
+import type { DbcData } from '../parsers/dbc'
 
 interface TableViewProps {
   importedFile: ImportedFile | null
+  dbcData: DbcData | null
 }
 
-function TableView({ importedFile }: TableViewProps) {
+function TableView({ importedFile, dbcData }: TableViewProps) {
   if (!importedFile) {
     return <p className="main-placeholder">Import a CAN log file to get started</p>
   }
@@ -16,6 +18,7 @@ function TableView({ importedFile }: TableViewProps) {
       frames={importedFile.result.frames}
       filename={importedFile.name}
       skippedLines={importedFile.result.skippedLines}
+      dbcData={dbcData}
     />
   )
 }

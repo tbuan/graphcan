@@ -6,59 +6,76 @@ import NavTabs from './components/NavTabs'
 import TableView from './views/TableView'
 import ChartView from './views/ChartView'
 import { parseBusmasterLog } from './parsers/busmaster'
-import { saveFile, loadFile, saveChartConfig, loadChartConfig } from './utils/storage'
+import { parseDbcFile, type DbcData } from './parsers/dbc'
+import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig } from './utils/storage'
 import type { ImportedFile, ChartConfig } from './types'
 import './App.css'
 
-const DEFAULT_CHART_CONFIG: ChartConfig = {
-  signals: [],
-  displayMode: 'line',
-}
+const DEFAULT_CHART_CONFIG: ChartConfig = { signals: [], displayMode: 'line' }
 
 function App() {
   const [importedFile, setImportedFile] = useState<ImportedFile | null>(null)
-  const [chartConfig, setChartConfig] = useState<ChartConfig>(
+  const [dbcData, setDbcData]           = useState<DbcData | null>(null)
+  const [dbcName, setDbcName]           = useState<string | null>(null)
+  const [chartConfig, setChartConfig]   = useState<ChartConfig>(
     () => loadChartConfig() ?? DEFAULT_CHART_CONFIG
   )
 
-  // Restore last file from IndexedDB on mount
+  // Restore persisted data on mount
   useEffect(() => {
     loadFile().then(stored => {
       if (!stored) return
-      const result = parseBusmasterLog(stored.content)
-      setImportedFile({ name: stored.name, result, importKey: 1 })
+      setImportedFile({ name: stored.name, result: parseBusmasterLog(stored.content), importKey: 1 })
+    })
+    loadDbcFile().then(stored => {
+      if (!stored) return
+      setDbcData(parseDbcFile(stored.content))
+      setDbcName(stored.name)
     })
   }, [])
 
-  // Persist chart config whenever it changes
-  useEffect(() => {
-    saveChartConfig(chartConfig)
-  }, [chartConfig])
+  // Persist chart config on every change
+  useEffect(() => { saveChartConfig(chartConfig) }, [chartConfig])
 
   function handleFileImport(content: string, filename: string) {
-    const result = parseBusmasterLog(content)
     setImportedFile(prev => ({
       name: filename,
-      result,
+      result: parseBusmasterLog(content),
       importKey: (prev?.importKey ?? 0) + 1,
     }))
     setChartConfig(prev => ({ ...prev, signals: [] }))
     saveFile(filename, content)
   }
 
+  function handleDbcImport(content: string, filename: string) {
+    setDbcData(parseDbcFile(content))
+    setDbcName(filename)
+    saveDbcFile(filename, content)
+  }
+
+  function handleDbcClear() {
+    setDbcData(null)
+    setDbcName(null)
+    clearDbcFile()
+  }
+
   return (
     <BrowserRouter>
       <div className="app">
-        <Header onFileImport={handleFileImport} />
+        <Header
+          onFileImport={handleFileImport}
+          onDbcImport={handleDbcImport}
+          dbcName={dbcName}
+          onDbcClear={handleDbcClear}
+        />
         <NavTabs />
         <div className="app-body">
           <Sidebar
             importedFile={importedFile}
+            dbcData={dbcData}
             onAddSignal={signal => {
               setChartConfig(prev => {
-                const exists = prev.signals.some(
-                  s => s.id === signal.id && s.byteIndex === signal.byteIndex
-                )
+                const exists = prev.signals.some(s => s.id === signal.id && s.byteIndex === signal.byteIndex)
                 if (exists) return prev
                 return { ...prev, signals: [...prev.signals, signal] }
               })
@@ -67,17 +84,10 @@ function App() {
           <main className="main-content">
             <Routes>
               <Route path="/" element={<Navigate to="/table" replace />} />
-              <Route path="/table" element={<TableView importedFile={importedFile} />} />
-              <Route
-                path="/chart"
-                element={
-                  <ChartView
-                    importedFile={importedFile}
-                    config={chartConfig}
-                    onConfigChange={setChartConfig}
-                  />
-                }
-              />
+              <Route path="/table" element={<TableView importedFile={importedFile} dbcData={dbcData} />} />
+              <Route path="/chart" element={
+                <ChartView importedFile={importedFile} dbcData={dbcData} config={chartConfig} onConfigChange={setChartConfig} />
+              } />
             </Routes>
           </main>
         </div>

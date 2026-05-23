@@ -3,6 +3,8 @@ import UPlotChart from '../components/UPlotChart'
 import { buildUPlotData } from '../utils/buildChartData'
 import { BYTE_COLORS } from '../utils/chartColors'
 import type { ImportedFile, ChartConfig, DisplayMode } from '../types'
+import type { DbcData } from '../parsers/dbc'
+import { getMessageLabel, getMessageName } from '../utils/dbc'
 
 const DISPLAY_MODES: { value: DisplayMode; label: string }[] = [
   { value: 'line',        label: 'Line' },
@@ -12,11 +14,12 @@ const DISPLAY_MODES: { value: DisplayMode; label: string }[] = [
 
 interface ChartViewProps {
   importedFile: ImportedFile | null
+  dbcData: DbcData | null
   config: ChartConfig
   onConfigChange: (config: ChartConfig) => void
 }
 
-function ChartView({ importedFile, config, onConfigChange }: ChartViewProps) {
+function ChartView({ importedFile, dbcData, config, onConfigChange }: ChartViewProps) {
   const { signals, displayMode } = config
 
   // Local state for the "add signal" form — ephemeral, no need to persist
@@ -70,7 +73,7 @@ function ChartView({ importedFile, config, onConfigChange }: ChartViewProps) {
             onChange={e => { setPendingId(e.target.value); setPendingByte(0) }}
           >
             <option value="">— select —</option>
-            {uniqueIds.map(id => <option key={id} value={id}>{id}</option>)}
+            {uniqueIds.map(id => <option key={id} value={id}>{getMessageLabel(id, dbcData)}</option>)}
           </select>
         </div>
 
@@ -124,7 +127,7 @@ function ChartView({ importedFile, config, onConfigChange }: ChartViewProps) {
                 className="signal-chip-dot"
                 style={{ background: BYTE_COLORS[i % BYTE_COLORS.length] }}
               />
-              {signal.id} · B{signal.byteIndex}
+              {getMessageName(signal.id, dbcData)} · B{signal.byteIndex}
               <button
                 className="signal-chip-remove"
                 onClick={() => removeSignal(i)}

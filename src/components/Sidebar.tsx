@@ -1,14 +1,17 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { parseTimestampToMs } from '../utils/time'
+import { getMessageLabel } from '../utils/dbc'
 import type { ImportedFile, Signal } from '../types'
+import type { DbcData } from '../parsers/dbc'
 
 interface SidebarProps {
   importedFile: ImportedFile | null
+  dbcData: DbcData | null
   onAddSignal: (signal: Signal) => void
 }
 
-function Sidebar({ importedFile, onAddSignal }: SidebarProps) {
+function Sidebar({ importedFile, dbcData, onAddSignal }: SidebarProps) {
   const navigate = useNavigate()
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -92,7 +95,9 @@ function Sidebar({ importedFile, onAddSignal }: SidebarProps) {
           {idStats.map(({ id, count, dlc }) => (
             <li key={id} className={`sidebar-id-item ${expandedId === id ? 'sidebar-id-item-open' : ''}`}>
               <div className="sidebar-id-row">
-                <span className="sidebar-id-value">{id}</span>
+                <span className="sidebar-id-value" title={id}>
+                  {getMessageLabel(id, dbcData)}
+                </span>
                 <span className="sidebar-id-count">{count}</span>
                 <button
                   className="sidebar-id-add"
