@@ -6,11 +6,10 @@ import NavTabs from './components/NavTabs'
 import TableView from './views/TableView'
 import ChartView from './views/ChartView'
 import AnalysisView from './views/AnalysisView'
-import { parseCanLog } from './parsers/parseCanLog'
-import { parseBlf } from './parsers/blf'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
 import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig } from './utils/storage'
 import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
+import ParseWorker from './workers/parseWorker?worker'
 import './App.css'
 
 const DEFAULT_CHART_CONFIG: ChartConfig = { signals: [], displayMode: 'line' }
@@ -24,12 +23,18 @@ function App() {
   )
   const [analysisPanels, setAnalysisPanels] = useState<AnalysisPanel[]>([])
   const [sidebarWidth, setSidebarWidth]     = useState(224)
+  const [isParsing, setIsParsing]           = useState(false)
 
   // Restore persisted data on mount
   useEffect(() => {
     loadFile().then(stored => {
       if (!stored) return
-      setImportedFile({ name: stored.name, result: parseCanLog(stored.content, stored.name), importKey: 1 })
+      const worker = new ParseWorker()
+      worker.onmessage = (e) => {
+        if (e.data.ok) setImportedFile({ name: stored.name, result: e.data.result, importKey: 1 })
+        worker.terminate()
+      }
+      worker.postMessage({ kind: 'text', content: stored.content, filename: stored.name })
     })
     loadDbcFile().then(stored => {
       if (!stored) return
@@ -42,22 +47,38 @@ function App() {
   useEffect(() => { saveChartConfig(chartConfig) }, [chartConfig])
 
   function handleFileImport(content: string, filename: string) {
-    setImportedFile(prev => ({
-      name: filename,
-      result: parseCanLog(content, filename),
-      importKey: (prev?.importKey ?? 0) + 1,
-    }))
-    setChartConfig(prev => ({ ...prev, signals: [] }))
-    saveFile(filename, content)
+    setIsParsing(true)
+    const worker = new ParseWorker()
+    worker.onmessage = (e) => {
+      const { ok, result, error } = e.data
+      if (ok) {
+        setImportedFile(prev => ({ name: filename, result, importKey: (prev?.importKey ?? 0) + 1 }))
+        setChartConfig(prev => ({ ...prev, signals: [] }))
+        saveFile(filename, content)
+      } else {
+        console.error('Parse error:', error)
+      }
+      setIsParsing(false)
+      worker.terminate()
+    }
+    worker.postMessage({ kind: 'text', content, filename })
   }
 
   function handleBinaryImport(buffer: ArrayBuffer, filename: string) {
-    setImportedFile(prev => ({
-      name: filename,
-      result: parseBlf(new Uint8Array(buffer)),
-      importKey: (prev?.importKey ?? 0) + 1,
-    }))
-    setChartConfig(prev => ({ ...prev, signals: [] }))
+    setIsParsing(true)
+    const worker = new ParseWorker()
+    worker.onmessage = (e) => {
+      const { ok, result, error } = e.data
+      if (ok) {
+        setImportedFile(prev => ({ name: filename, result, importKey: (prev?.importKey ?? 0) + 1 }))
+        setChartConfig(prev => ({ ...prev, signals: [] }))
+      } else {
+        console.error('Parse error:', error)
+      }
+      setIsParsing(false)
+      worker.terminate()
+    }
+    worker.postMessage({ kind: 'binary', buffer }, [buffer])
   }
 
   function handleDbcImport(content: string, filename: string) {
@@ -115,6 +136,7 @@ function App() {
           onDbcImport={handleDbcImport}
           dbcName={dbcName}
           onDbcClear={handleDbcClear}
+          isParsing={isParsing}
         />
         <NavTabs />
         <div className="app-body">

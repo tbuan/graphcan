@@ -1,4 +1,5 @@
-import { useState, useMemo, useRef, useEffect, Fragment } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import type { CanFrame } from '../parsers/busmaster'
 import type { DbcData } from '../parsers/dbc'
 import { parseTimestampToMs, formatDelta } from '../utils/time'
@@ -25,22 +26,25 @@ interface IndexedFrame {
   originalIndex: number
 }
 
-
-const MAX_DISPLAYED_FRAMES = 2000
+// Each virtual row is either a frame row or its expanded signal sub-row
+type FlatItem =
+  | { type: 'frame';   indexed: IndexedFrame }
+  | { type: 'signals'; indexed: IndexedFrame }
 
 function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps) {
   const [visibleIds, setVisibleIds] = useState<Set<string>>(
     () => new Set(frames.map(f => f.id))
   )
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null)
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [selectedA, setSelectedA] = useState<number | null>(null)
-  const [selectedB, setSelectedB] = useState<number | null>(null)
+  const [sortConfig, setSortConfig]   = useState<SortConfig | null>(null)
+  const [filterOpen, setFilterOpen]   = useState(false)
+  const [selectedA, setSelectedA]     = useState<number | null>(null)
+  const [selectedB, setSelectedB]     = useState<number | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
-  const [displayHex, setDisplayHex]     = useState(true)
-  const filterRef = useRef<HTMLDivElement>(null)
+  const [displayHex, setDisplayHex]   = useState(true)
 
-  // Close filter panel when clicking outside
+  const filterRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
@@ -69,22 +73,42 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
       const mul = direction === 'asc' ? 1 : -1
       result = [...result].sort((a, b) => {
         switch (column) {
-          case 'timestamp':
-            return mul * (parseTimestampToMs(a.frame.timestamp) - parseTimestampToMs(b.frame.timestamp))
-          case 'direction':
-            return mul * a.frame.direction.localeCompare(b.frame.direction)
-          case 'id':
-            return mul * a.frame.id.localeCompare(b.frame.id)
-          case 'dlc':
-            return mul * (a.frame.dlc - b.frame.dlc)
-          default:
-            return 0
+          case 'timestamp': return mul * (parseTimestampToMs(a.frame.timestamp) - parseTimestampToMs(b.frame.timestamp))
+          case 'direction': return mul * a.frame.direction.localeCompare(b.frame.direction)
+          case 'id':        return mul * a.frame.id.localeCompare(b.frame.id)
+          case 'dlc':       return mul * (a.frame.dlc - b.frame.dlc)
+          default:          return 0
         }
       })
     }
 
-    return result.slice(0, MAX_DISPLAYED_FRAMES)
+    return result
   }, [frames, visibleIds, sortConfig])
+
+  // Flatten frames + expanded signal sub-rows into a single list for the virtualizer
+  const flatItems = useMemo<FlatItem[]>(() => {
+    const items: FlatItem[] = []
+    for (const indexed of displayedFrames) {
+      items.push({ type: 'frame', indexed })
+      if (expandedRows.has(indexed.originalIndex)) {
+        items.push({ type: 'signals', indexed })
+      }
+    }
+    return items
+  }, [displayedFrames, expandedRows])
+
+  const virtualizer = useVirtualizer({
+    count: flatItems.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: (i) => flatItems[i].type === 'frame' ? 33 : 88,
+    measureElement: (el) => el.getBoundingClientRect().height,
+    overscan: 10,
+  })
+
+  const virtualItems = virtualizer.getVirtualItems()
+  const totalSize    = virtualizer.getTotalSize()
+  const topPadding    = virtualItems.length > 0 ? virtualItems[0].start : 0
+  const bottomPadding = virtualItems.length > 0 ? totalSize - virtualItems[virtualItems.length - 1].end : 0
 
   const delta = useMemo(() => {
     if (selectedA === null || selectedB === null) return null
@@ -93,11 +117,7 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
     if (!frameA || !frameB) return null
     const msA = parseTimestampToMs(frameA.timestamp)
     const msB = parseTimestampToMs(frameB.timestamp)
-    return {
-      formatted: formatDelta(msB - msA),
-      tsA: frameA.timestamp,
-      tsB: frameB.timestamp,
-    }
+    return { formatted: formatDelta(msB - msA), tsA: frameA.timestamp, tsB: frameB.timestamp }
   }, [selectedA, selectedB, frames])
 
   function toggleSort(column: SortColumn) {
@@ -110,23 +130,10 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
   }
 
   function handleRowClick(originalIndex: number) {
-    if (selectedA === originalIndex) {
-      setSelectedA(selectedB)
-      setSelectedB(null)
-      return
-    }
-    if (selectedB === originalIndex) {
-      setSelectedB(null)
-      return
-    }
-    if (selectedA === null) {
-      setSelectedA(originalIndex)
-      return
-    }
-    if (selectedB === null) {
-      setSelectedB(originalIndex)
-      return
-    }
+    if (selectedA === originalIndex) { setSelectedA(selectedB); setSelectedB(null); return }
+    if (selectedB === originalIndex) { setSelectedB(null); return }
+    if (selectedA === null)          { setSelectedA(originalIndex); return }
+    if (selectedB === null)          { setSelectedB(originalIndex); return }
     setSelectedA(selectedB)
     setSelectedB(originalIndex)
   }
@@ -144,8 +151,7 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
     return <span className="sort-icon">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
   }
 
-  const totalFiltered = frames.filter(f => visibleIds.has(f.id)).length
-  const truncated = totalFiltered > MAX_DISPLAYED_FRAMES
+  const totalFiltered = displayedFrames.length
 
   return (
     <div className="frame-table-wrapper">
@@ -156,7 +162,6 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
           <span className="frame-table-stats">
             {totalFiltered.toLocaleString()} / {frames.length.toLocaleString()} frames
             {skippedLines > 0 && ` · ${skippedLines} skipped`}
-            {truncated && ` · showing first ${MAX_DISPLAYED_FRAMES.toLocaleString()}`}
           </span>
         </div>
 
@@ -170,36 +175,36 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
           </button>
 
           <div className="frame-table-controls" ref={filterRef}>
-          <button className="btn-filter" onClick={() => setFilterOpen(o => !o)}>
-            IDs ({visibleIds.size}/{uniqueIds.length}) ▾
-          </button>
-          {filterOpen && (
-            <div className="filter-panel">
-              <div className="filter-panel-actions">
-                <button onClick={() => setVisibleIds(new Set(uniqueIds))}>All</button>
-                <button onClick={() => setVisibleIds(new Set())}>None</button>
+            <button className="btn-filter" onClick={() => setFilterOpen(o => !o)}>
+              IDs ({visibleIds.size}/{uniqueIds.length}) ▾
+            </button>
+            {filterOpen && (
+              <div className="filter-panel">
+                <div className="filter-panel-actions">
+                  <button onClick={() => setVisibleIds(new Set(uniqueIds))}>All</button>
+                  <button onClick={() => setVisibleIds(new Set())}>None</button>
+                </div>
+                <ul className="filter-id-list">
+                  {uniqueIds.map(id => (
+                    <li key={id}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={visibleIds.has(id)}
+                          onChange={() => setVisibleIds(prev => {
+                            const next = new Set(prev)
+                            next.has(id) ? next.delete(id) : next.add(id)
+                            return next
+                          })}
+                        />
+                        <span className="filter-id-value">{getMessageLabel(id, dbcData)}</span>
+                        <span className="filter-id-count">{idCounts[id]}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="filter-id-list">
-                {uniqueIds.map(id => (
-                  <li key={id}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={visibleIds.has(id)}
-                        onChange={() => setVisibleIds(prev => {
-                          const next = new Set(prev)
-                          next.has(id) ? next.delete(id) : next.add(id)
-                          return next
-                        })}
-                      />
-                      <span className="filter-id-value">{getMessageLabel(id, dbcData)}</span>
-                      <span className="filter-id-count">{idCounts[id]}</span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            )}
           </div>
         </div>
       </div>
@@ -211,46 +216,43 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
           <span className="delta-arrow">→</span>
           <span className="delta-ts">{delta.tsB}</span>
           <span className="delta-value">{delta.formatted}</span>
-          <button
-            className="delta-close"
-            onClick={() => { setSelectedA(null); setSelectedB(null) }}
-          >
-            ✕
-          </button>
+          <button className="delta-close" onClick={() => { setSelectedA(null); setSelectedB(null) }}>✕</button>
         </div>
       )}
 
-      <div className="frame-table-scroll">
+      <div className="frame-table-scroll" ref={scrollRef}>
         <table className="frame-table">
           <thead>
             <tr>
               <th className="th-expand"></th>
-              <th className="th-sortable" onClick={() => toggleSort('timestamp')}>
-                Timestamp {getSortIcon('timestamp')}
-              </th>
-              <th className="th-sortable" onClick={() => toggleSort('direction')}>
-                Dir {getSortIcon('direction')}
-              </th>
+              <th className="th-sortable" onClick={() => toggleSort('timestamp')}>Timestamp {getSortIcon('timestamp')}</th>
+              <th className="th-sortable" onClick={() => toggleSort('direction')}>Dir {getSortIcon('direction')}</th>
               <th>Ch</th>
-              <th className="th-sortable" onClick={() => toggleSort('id')}>
-                CAN ID {getSortIcon('id')}
-              </th>
-              <th className="th-sortable" onClick={() => toggleSort('dlc')}>
-                DLC {getSortIcon('dlc')}
-              </th>
+              <th className="th-sortable" onClick={() => toggleSort('id')}>CAN ID {getSortIcon('id')}</th>
+              <th className="th-sortable" onClick={() => toggleSort('dlc')}>DLC {getSortIcon('dlc')}</th>
               <th>Data</th>
             </tr>
           </thead>
           <tbody>
-            {displayedFrames.map(({ frame, originalIndex }) => {
-              const isA = selectedA === originalIndex
-              const isB = selectedB === originalIndex
-              const message = dbcData?.[frame.id]
-              const hasSignals = (message?.signals.length ?? 0) > 0
-              const isExpanded = expandedRows.has(originalIndex)
-              return (
-                <Fragment key={originalIndex}>
+            {topPadding > 0 && (
+              <tr><td colSpan={7} style={{ height: topPadding, padding: 0 }} /></tr>
+            )}
+
+            {virtualItems.map(vItem => {
+              const item = flatItems[vItem.index]
+
+              if (item.type === 'frame') {
+                const { frame, originalIndex } = item.indexed
+                const isA = selectedA === originalIndex
+                const isB = selectedB === originalIndex
+                const message   = dbcData?.[frame.id]
+                const hasSignals = (message?.signals.length ?? 0) > 0
+                const isExpanded = expandedRows.has(originalIndex)
+                return (
                   <tr
+                    key={`f-${originalIndex}`}
+                    data-index={vItem.index}
+                    ref={virtualizer.measureElement}
                     onClick={() => handleRowClick(originalIndex)}
                     className={isA ? 'row-selected-a' : isB ? 'row-selected-b' : ''}
                   >
@@ -266,9 +268,7 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
                       )}
                     </td>
                     <td className="cell-mono">{frame.timestamp}</td>
-                    <td className={frame.direction === 'Rx' ? 'cell-rx' : 'cell-tx'}>
-                      {frame.direction}
-                    </td>
+                    <td className={frame.direction === 'Rx' ? 'cell-rx' : 'cell-tx'}>{frame.direction}</td>
                     <td>{frame.channel}</td>
                     <td className="cell-mono cell-id" title={frame.id}>{getMessageName(frame.id, dbcData)}</td>
                     <td>{frame.dlc}</td>
@@ -278,56 +278,63 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
                         : frame.data.map(b => parseInt(b, 16)).join(' ')}
                     </td>
                   </tr>
-                  {isExpanded && message && (() => {
-                    const bytes = frame.data.map(b => parseInt(b, 16))
-                    const switchSignal = message.signals.find(s => s.mux?.kind === 'switch')
-                    const activeMuxId = switchSignal ? decodeRawInt(bytes, switchSignal) : null
-                    const visibleSignals = message.signals.filter(s => {
-                      if (!s.mux) return true
-                      if (s.mux.kind === 'switch') return true
-                      return activeMuxId !== null && s.mux.id === activeMuxId
-                    })
-                    return (
-                      <tr className="row-signals">
-                        <td colSpan={7}>
-                          <div className="signal-decode-grid">
-                            {visibleSignals.map(signal => {
-                              const raw = decodeRawInt(bytes, signal)
-                              const label = signal.values?.[raw]
-                              let formatted: string
-                              let unit: string | null = null
+                )
+              }
 
-                              if (displayHex) {
-                                formatted = `0x${raw.toString(16).toUpperCase()}`
-                              } else if (label !== undefined) {
-                                formatted = label
-                              } else {
-                                const value = decodeSignal(bytes, signal)
-                                formatted = isFinite(value)
-                                  ? parseFloat(value.toPrecision(6)).toString()
-                                  : '—'
-                                unit = signal.unit || null
-                              }
+              // type === 'signals'
+              const { frame, originalIndex } = item.indexed
+              const message = dbcData![frame.id]
+              const bytes = frame.data.map(b => parseInt(b, 16))
+              const switchSignal = message.signals.find(s => s.mux?.kind === 'switch')
+              const activeMuxId  = switchSignal ? decodeRawInt(bytes, switchSignal) : null
+              const visibleSignals = message.signals.filter(s => {
+                if (!s.mux) return true
+                if (s.mux.kind === 'switch') return true
+                return activeMuxId !== null && s.mux.id === activeMuxId
+              })
+              return (
+                <tr
+                  key={`s-${originalIndex}`}
+                  data-index={vItem.index}
+                  ref={virtualizer.measureElement}
+                  className="row-signals"
+                >
+                  <td colSpan={7}>
+                    <div className="signal-decode-grid">
+                      {visibleSignals.map(signal => {
+                        const raw   = decodeRawInt(bytes, signal)
+                        const label = signal.values?.[raw]
+                        let formatted: string
+                        let unit: string | null = null
 
-                              return (
-                                <div key={signal.name} className="signal-decode-item" title={label && displayHex ? label : undefined}>
-                                  <span className="signal-decode-name">{signal.name}</span>
-                                  <span className="signal-decode-value">{formatted}</span>
-                                  {unit && <span className="signal-decode-unit">{unit}</span>}
-                                  {label && displayHex && (
-                                    <span className="signal-decode-label">{label}</span>
-                                  )}
-                                </div>
-                              )
-                            })}
+                        if (displayHex) {
+                          formatted = `0x${raw.toString(16).toUpperCase()}`
+                        } else if (label !== undefined) {
+                          formatted = label
+                        } else {
+                          const value = decodeSignal(bytes, signal)
+                          formatted = isFinite(value) ? parseFloat(value.toPrecision(6)).toString() : '—'
+                          unit = signal.unit || null
+                        }
+
+                        return (
+                          <div key={signal.name} className="signal-decode-item" title={label && displayHex ? label : undefined}>
+                            <span className="signal-decode-name">{signal.name}</span>
+                            <span className="signal-decode-value">{formatted}</span>
+                            {unit && <span className="signal-decode-unit">{unit}</span>}
+                            {label && displayHex && <span className="signal-decode-label">{label}</span>}
                           </div>
-                        </td>
-                      </tr>
-                    )
-                  })()}
-                </Fragment>
+                        )
+                      })}
+                    </div>
+                  </td>
+                </tr>
               )
             })}
+
+            {bottomPadding > 0 && (
+              <tr><td colSpan={7} style={{ height: bottomPadding, padding: 0 }} /></tr>
+            )}
           </tbody>
         </table>
       </div>

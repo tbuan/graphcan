@@ -6,6 +6,7 @@ interface HeaderProps {
   onDbcImport: (content: string, filename: string) => void
   dbcName: string | null
   onDbcClear: () => void
+  isParsing: boolean
 }
 
 function readFileAsText(file: File): Promise<string> {
@@ -26,7 +27,7 @@ function readFileAsBuffer(file: File): Promise<ArrayBuffer> {
   })
 }
 
-function Header({ onFileImport, onBinaryImport, onDbcImport, dbcName, onDbcClear }: HeaderProps) {
+function Header({ onFileImport, onBinaryImport, onDbcImport, dbcName, onDbcClear, isParsing }: HeaderProps) {
   const logInputRef = useRef<HTMLInputElement>(null)
   const dbcInputRef = useRef<HTMLInputElement>(null)
 
@@ -79,8 +80,8 @@ function Header({ onFileImport, onBinaryImport, onDbcImport, dbcName, onDbcClear
           </button>
         )}
 
-        <button className="btn-import" onClick={() => logInputRef.current?.click()}>
-          Import CAN log
+        <button className="btn-import" onClick={() => logInputRef.current?.click()} disabled={isParsing}>
+          {isParsing ? 'Parsing…' : 'Import CAN log'}
         </button>
 
         <input ref={logInputRef} type="file" accept=".asc,.csv,.trc,.log,.blf"

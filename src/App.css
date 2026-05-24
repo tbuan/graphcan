@@ -698,7 +698,15 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  gap: 16px;
+  gap: 12px;
+}
+
+.chart-topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-height: 32px;
 }
 
 .chart-controls {
@@ -786,7 +794,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  flex-shrink: 0;
+  flex: 1;
 }
 
 .signal-chip {
