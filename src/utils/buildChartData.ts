@@ -15,7 +15,7 @@ function downsample(frames: CanFrame[], maxPoints: number): CanFrame[] {
 
 export function buildUPlotData(
   frames: CanFrame[],
-  signals: Signal[],
+  signals: Pick<Signal, 'id' | 'byteIndex'>[],
 ): uPlot.AlignedData {
   if (signals.length === 0) return [[], []]
 
