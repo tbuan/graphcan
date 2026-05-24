@@ -1,5 +1,5 @@
 import { openDB } from 'idb'
-import type { ChartConfig } from '../types'
+import type { ChartConfig, AnalysisPanel } from '../types'
 
 const DB_NAME = 'graphcan'
 const DB_VERSION = 2
@@ -45,6 +45,24 @@ export async function loadDbcFile(): Promise<StoredFile | undefined> {
 export async function clearDbcFile(): Promise<void> {
   const db = await getDB()
   await db.delete('dbc', 'last')
+}
+
+// ── Analysis panels (localStorage) ───────────────────────────
+
+const ANALYSIS_PANELS_KEY = 'graphcan-analysis-panels'
+
+export function saveAnalysisPanels(panels: AnalysisPanel[]): void {
+  localStorage.setItem(ANALYSIS_PANELS_KEY, JSON.stringify(panels))
+}
+
+export function loadAnalysisPanels(): AnalysisPanel[] | null {
+  const raw = localStorage.getItem(ANALYSIS_PANELS_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as AnalysisPanel[]
+  } catch {
+    return null
+  }
 }
 
 // ── Chart config (localStorage) ───────────────────────────────

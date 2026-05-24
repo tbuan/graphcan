@@ -1,7 +1,6 @@
 import { useRef } from 'react'
 import uPlot from 'uplot'
 import SignalPanel from '../components/SignalPanel'
-import { BYTE_COLORS } from '../utils/chartColors'
 import type { ImportedFile, AnalysisPanel } from '../types'
 import type { DbcData } from '../parsers/dbc'
 
@@ -46,13 +45,13 @@ function AnalysisView({ panels, importedFile, dbcData, onRemovePanel, themeKey }
 
   return (
     <div className="analysis-view">
-      {panels.map((panel, i) => (
+      {panels.map((panel) => (
         <SignalPanel
           key={panel.uid}
           panel={panel}
           frames={importedFile.result.frames}
           dbcData={dbcData}
-          color={BYTE_COLORS[i % BYTE_COLORS.length]}
+          color={panel.color}
           syncKey={SYNC_KEY}
           themeKey={themeKey}
           onRemove={() => onRemovePanel(panel.uid)}

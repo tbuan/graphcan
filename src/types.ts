@@ -27,4 +27,5 @@ export interface AnalysisPanel {
   uid: string
   id: string
   source: AnalysisPanelSource
+  color: string
 }

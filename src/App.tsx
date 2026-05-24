@@ -7,7 +7,7 @@ import TableView from './views/TableView'
 import ChartView from './views/ChartView'
 import AnalysisView from './views/AnalysisView'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
-import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig } from './utils/storage'
+import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig, saveAnalysisPanels, loadAnalysisPanels } from './utils/storage'
 import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
 import { BYTE_COLORS } from './utils/chartColors'
 import ParseWorker from './workers/parseWorker?worker'
@@ -29,7 +29,9 @@ function App() {
     }))
     return { ...saved, signals }
   })
-  const [analysisPanels, setAnalysisPanels] = useState<AnalysisPanel[]>([])
+  const [analysisPanels, setAnalysisPanels] = useState<AnalysisPanel[]>(
+    () => loadAnalysisPanels() ?? []
+  )
   const [sidebarWidth, setSidebarWidth] = useState(224)
   const [isParsing, setIsParsing]       = useState(false)
   const [darkMode, setDarkMode]         = useState(() => localStorage.getItem('graphcan-dark') === 'true')
@@ -52,8 +54,9 @@ function App() {
     })
   }, [])
 
-  // Persist chart config on every change
+  // Persist chart config and analysis panels on every change
   useEffect(() => { saveChartConfig(chartConfig) }, [chartConfig])
+  useEffect(() => { saveAnalysisPanels(analysisPanels) }, [analysisPanels])
 
   // Apply dark mode to DOM + persist
   useEffect(() => {
@@ -109,10 +112,11 @@ function App() {
   }
 
   function handleAddPanel(id: string, source: AnalysisPanelSource) {
-    setAnalysisPanels(prev => [
-      ...prev,
-      { uid: `${id}-${Date.now()}`, id, source },
-    ])
+    setAnalysisPanels(prev => {
+      const usedColors = new Set(prev.map(p => p.color))
+      const color = BYTE_COLORS.find(c => !usedColors.has(c)) ?? BYTE_COLORS[prev.length % BYTE_COLORS.length]
+      return [...prev, { uid: `${id}-${Date.now()}`, id, source, color }]
+    })
   }
 
   function handleRemovePanel(uid: string) {

@@ -125,12 +125,12 @@ function Sidebar({ importedFile, dbcData, onAddSignal, onAddPanel }: SidebarProp
           {idStats.map(({ id, count, dlc }) => (
             <li key={id} className={`sidebar-id-item ${expandedId === id ? 'sidebar-id-item-open' : ''}`}>
               <div className="sidebar-id-row">
-                <span className="sidebar-id-value" title={id}>
+                <span
+                  className="sidebar-id-value"
+                  title={cycleTimes[id] !== undefined ? `${id} · avg cycle: ${cycleTimes[id].toFixed(1)} ms` : id}
+                >
                   {getMessageLabel(id, dbcData)}
                 </span>
-                {cycleTimes[id] !== undefined && (
-                  <span className="sidebar-id-cycle">{cycleTimes[id].toFixed(1)} ms</span>
-                )}
                 <span className="sidebar-id-count">{count}</span>
                 <button
                   className="sidebar-id-add"

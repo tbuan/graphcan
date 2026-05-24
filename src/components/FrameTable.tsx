@@ -13,7 +13,11 @@ interface FrameTableProps {
   dbcData: DbcData | null
 }
 
-type SortColumn = 'timestamp' | 'direction' | 'id' | 'dlc'
+type SortColumn   = 'timestamp' | 'direction' | 'id' | 'dlc'
+type SearchField  = 'id' | 'time' | 'data'
+
+const SEARCH_FIELD_LABELS: Record<SearchField, string> = { id: 'ID', time: 'Time', data: 'Data' }
+const ALL_SEARCH_FIELDS: SearchField[] = ['id', 'time', 'data']
 type SortDirection = 'asc' | 'desc'
 
 interface SortConfig {
@@ -31,17 +35,42 @@ type FlatItem =
   | { type: 'frame';   indexed: IndexedFrame }
   | { type: 'signals'; indexed: IndexedFrame }
 
+function loadTablePrefs() {
+  try {
+    return {
+      displayHex:  JSON.parse(localStorage.getItem('graphcan-table-displayhex') ?? 'true') as boolean,
+      sortConfig:  JSON.parse(localStorage.getItem('graphcan-table-sort') ?? 'null') as SortConfig | null,
+    }
+  } catch { return { displayHex: true, sortConfig: null } }
+}
+
+function loadSavedVisibleIds(allIds: Set<string>, filename: string): Set<string> {
+  try {
+    const raw = localStorage.getItem('graphcan-table-filter')
+    if (!raw) return allIds
+    const { filename: savedName, hiddenIds } = JSON.parse(raw) as { filename: string; hiddenIds: string[] }
+    if (savedName !== filename) return allIds
+    const hidden = new Set(hiddenIds)
+    return new Set([...allIds].filter(id => !hidden.has(id)))
+  } catch { return allIds }
+}
+
 function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps) {
+  const allIds = useMemo(() => new Set(frames.map(f => f.id)), [frames])
+
   const [visibleIds, setVisibleIds] = useState<Set<string>>(
-    () => new Set(frames.map(f => f.id))
+    () => loadSavedVisibleIds(new Set(frames.map(f => f.id)), filename)
   )
-  const [sortConfig, setSortConfig]   = useState<SortConfig | null>(null)
+  const [sortConfig, setSortConfig]   = useState<SortConfig | null>(() => loadTablePrefs().sortConfig)
   const [filterOpen, setFilterOpen]   = useState(false)
   const [selectedA, setSelectedA]     = useState<number | null>(null)
   const [selectedB, setSelectedB]     = useState<number | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
-  const [displayHex, setDisplayHex]   = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [displayHex, setDisplayHex]   = useState(() => loadTablePrefs().displayHex)
+  const [searchQuery, setSearchQuery]     = useState('')
+  const [searchFields, setSearchFields]   = useState<Set<SearchField>>(
+    () => new Set<SearchField>(ALL_SEARCH_FIELDS)
+  )
 
   const filterRef = useRef<HTMLDivElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -55,6 +84,16 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem('graphcan-table-displayhex', JSON.stringify(displayHex))
+    localStorage.setItem('graphcan-table-sort', JSON.stringify(sortConfig))
+  }, [displayHex, sortConfig])
+
+  useEffect(() => {
+    const hiddenIds = [...allIds].filter(id => !visibleIds.has(id))
+    localStorage.setItem('graphcan-table-filter', JSON.stringify({ filename, hiddenIds }))
+  }, [visibleIds, allIds, filename])
 
   const { uniqueIds, idCounts } = useMemo(() => {
     const counts: Record<string, number> = {}
@@ -83,18 +122,21 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
       })
     }
 
-    if (searchQuery.trim()) {
+    if (searchQuery.trim() && searchFields.size > 0) {
       const q = searchQuery.trim().toLowerCase()
-      result = result.filter(({ frame }) =>
-        frame.id.toLowerCase().includes(q) ||
-        frame.timestamp.toLowerCase().includes(q) ||
-        frame.data.join(' ').toLowerCase().includes(q) ||
-        getMessageName(frame.id, dbcData).toLowerCase().includes(q)
-      )
+      result = result.filter(({ frame }) => {
+        if (searchFields.has('id') && (
+          frame.id.toLowerCase().includes(q) ||
+          getMessageName(frame.id, dbcData).toLowerCase().includes(q)
+        )) return true
+        if (searchFields.has('time') && frame.timestamp.toLowerCase().includes(q)) return true
+        if (searchFields.has('data') && frame.data.join(' ').toLowerCase().includes(q)) return true
+        return false
+      })
     }
 
     return result
-  }, [frames, visibleIds, sortConfig, searchQuery, dbcData])
+  }, [frames, visibleIds, sortConfig, searchQuery, searchFields, dbcData])
 
   // Flatten frames + expanded signal sub-rows into a single list for the virtualizer
   const flatItems = useMemo<FlatItem[]>(() => {
@@ -176,13 +218,31 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
           </span>
         </div>
 
-        <input
-          className="frame-table-search"
-          type="search"
-          placeholder="Search…"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-        />
+        <div className="frame-table-search-group">
+          <input
+            className="frame-table-search"
+            type="search"
+            placeholder="Search…"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          <div className="search-field-toggles">
+            {ALL_SEARCH_FIELDS.map(field => (
+              <button
+                key={field}
+                className={`btn-search-field ${searchFields.has(field) ? 'active' : ''}`}
+                onClick={() => setSearchFields(prev => {
+                  const next = new Set(prev)
+                  if (next.has(field) && next.size > 1) next.delete(field)
+                  else next.add(field)
+                  return next
+                })}
+              >
+                {SEARCH_FIELD_LABELS[field]}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="frame-table-right-controls">
           <button
