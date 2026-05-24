@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import UPlotChart from '../components/UPlotChart'
 import { buildUPlotData } from '../utils/buildChartData'
-import { BYTE_COLORS } from '../utils/chartColors'
 import type { ImportedFile, ChartConfig, DisplayMode } from '../types'
 import type { DbcData } from '../parsers/dbc'
 import { getMessageName } from '../utils/dbc'
@@ -17,9 +16,10 @@ interface ChartViewProps {
   dbcData: DbcData | null
   config: ChartConfig
   onConfigChange: (config: ChartConfig) => void
+  themeKey: string
 }
 
-function ChartView({ importedFile, dbcData, config, onConfigChange }: ChartViewProps) {
+function ChartView({ importedFile, dbcData, config, onConfigChange, themeKey }: ChartViewProps) {
   const { signals, displayMode } = config
 
   const uplotData = useMemo(
@@ -48,7 +48,7 @@ function ChartView({ importedFile, dbcData, config, onConfigChange }: ChartViewP
             <span key={i} className="signal-chip">
               <span
                 className="signal-chip-dot"
-                style={{ background: BYTE_COLORS[i % BYTE_COLORS.length] }}
+                style={{ background: signal.color }}
               />
               {getMessageName(signal.id, dbcData)} · B{signal.byteIndex}
               <button
@@ -81,6 +81,7 @@ function ChartView({ importedFile, dbcData, config, onConfigChange }: ChartViewP
           data={uplotData}
           signals={signals}
           displayMode={displayMode}
+          themeKey={themeKey}
         />
       ) : (
         <p className="chart-empty">Add signals from the sidebar to get started</p>

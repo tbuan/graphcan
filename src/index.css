@@ -28,6 +28,18 @@
   --sidebar-width: 224px;
 }
 
+/* ── Dark theme ──────────────────────────────────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg:          #0F1117;
+  --color-surface:     #1A1D27;
+  --color-surface-alt: #21253A;
+  --color-border:      #2A2D3A;
+  --color-text:        #E2E4ED;
+  --color-text-muted:  #6B7280;
+  --color-accent:      #E2E4ED;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);

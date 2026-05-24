@@ -10,11 +10,12 @@ interface AnalysisViewProps {
   importedFile: ImportedFile | null
   dbcData: DbcData | null
   onRemovePanel: (uid: string) => void
+  themeKey: string
 }
 
 const SYNC_KEY = 'graphcan-analysis'
 
-function AnalysisView({ panels, importedFile, dbcData, onRemovePanel }: AnalysisViewProps) {
+function AnalysisView({ panels, importedFile, dbcData, onRemovePanel, themeKey }: AnalysisViewProps) {
   const instancesRef = useRef<uPlot[]>([])
   const syncingRef   = useRef(false)
 
@@ -53,6 +54,7 @@ function AnalysisView({ panels, importedFile, dbcData, onRemovePanel }: Analysis
           dbcData={dbcData}
           color={BYTE_COLORS[i % BYTE_COLORS.length]}
           syncKey={SYNC_KEY}
+          themeKey={themeKey}
           onRemove={() => onRemovePanel(panel.uid)}
           onReady={handleReady}
           onDestroy={handleDestroy}

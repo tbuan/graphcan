@@ -9,6 +9,7 @@ export interface ImportedFile {
 export interface Signal {
   id: string
   byteIndex: number
+  color: string
 }
 
 export type DisplayMode = 'line' | 'points' | 'line+points'

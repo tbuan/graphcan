@@ -9,6 +9,7 @@ import AnalysisView from './views/AnalysisView'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
 import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig } from './utils/storage'
 import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
+import { BYTE_COLORS } from './utils/chartColors'
 import ParseWorker from './workers/parseWorker?worker'
 import './App.css'
 
@@ -18,12 +19,20 @@ function App() {
   const [importedFile, setImportedFile] = useState<ImportedFile | null>(null)
   const [dbcData, setDbcData]           = useState<DbcData | null>(null)
   const [dbcName, setDbcName]           = useState<string | null>(null)
-  const [chartConfig, setChartConfig]   = useState<ChartConfig>(
-    () => loadChartConfig() ?? DEFAULT_CHART_CONFIG
-  )
+  const [chartConfig, setChartConfig]   = useState<ChartConfig>(() => {
+    const saved = loadChartConfig()
+    if (!saved) return DEFAULT_CHART_CONFIG
+    // Migrate persisted signals that predate the stable-color field
+    const signals = saved.signals.map((s, i) => ({
+      ...s,
+      color: (s as { color?: string }).color ?? BYTE_COLORS[i % BYTE_COLORS.length],
+    }))
+    return { ...saved, signals }
+  })
   const [analysisPanels, setAnalysisPanels] = useState<AnalysisPanel[]>([])
-  const [sidebarWidth, setSidebarWidth]     = useState(224)
-  const [isParsing, setIsParsing]           = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(224)
+  const [isParsing, setIsParsing]       = useState(false)
+  const [darkMode, setDarkMode]         = useState(() => localStorage.getItem('graphcan-dark') === 'true')
 
   // Restore persisted data on mount
   useEffect(() => {
@@ -45,6 +54,12 @@ function App() {
 
   // Persist chart config on every change
   useEffect(() => { saveChartConfig(chartConfig) }, [chartConfig])
+
+  // Apply dark mode to DOM + persist
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
+    localStorage.setItem('graphcan-dark', String(darkMode))
+  }, [darkMode])
 
   function handleFileImport(content: string, filename: string) {
     setIsParsing(true)
@@ -137,8 +152,11 @@ function App() {
           dbcName={dbcName}
           onDbcClear={handleDbcClear}
           isParsing={isParsing}
+          darkMode={darkMode}
+          onDarkModeToggle={() => setDarkMode(d => !d)}
         />
         <NavTabs />
+        {isParsing && <div className="loading-bar" />}
         <div className="app-body">
           <div className="sidebar-container" style={{ width: sidebarWidth }}>
             <Sidebar
@@ -148,7 +166,9 @@ function App() {
                 setChartConfig(prev => {
                   const exists = prev.signals.some(s => s.id === signal.id && s.byteIndex === signal.byteIndex)
                   if (exists) return prev
-                  return { ...prev, signals: [...prev.signals, signal] }
+                  const usedColors = new Set(prev.signals.map(s => s.color))
+                  const color = BYTE_COLORS.find(c => !usedColors.has(c)) ?? BYTE_COLORS[prev.signals.length % BYTE_COLORS.length]
+                  return { ...prev, signals: [...prev.signals, { ...signal, color }] }
                 })
               }}
               onAddPanel={handleAddPanel}
@@ -160,10 +180,10 @@ function App() {
               <Route path="/" element={<Navigate to="/table" replace />} />
               <Route path="/table" element={<TableView importedFile={importedFile} dbcData={dbcData} />} />
               <Route path="/chart" element={
-                <ChartView importedFile={importedFile} dbcData={dbcData} config={chartConfig} onConfigChange={setChartConfig} />
+                <ChartView importedFile={importedFile} dbcData={dbcData} config={chartConfig} onConfigChange={setChartConfig} themeKey={darkMode ? 'dark' : 'light'} />
               } />
               <Route path="/analysis" element={
-                <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} onRemovePanel={handleRemovePanel} />
+                <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} onRemovePanel={handleRemovePanel} themeKey={darkMode ? 'dark' : 'light'} />
               } />
             </Routes>
           </main>

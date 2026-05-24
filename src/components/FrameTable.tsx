@@ -41,6 +41,7 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
   const [selectedB, setSelectedB]     = useState<number | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
   const [displayHex, setDisplayHex]   = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const filterRef = useRef<HTMLDivElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -82,8 +83,18 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
       })
     }
 
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase()
+      result = result.filter(({ frame }) =>
+        frame.id.toLowerCase().includes(q) ||
+        frame.timestamp.toLowerCase().includes(q) ||
+        frame.data.join(' ').toLowerCase().includes(q) ||
+        getMessageName(frame.id, dbcData).toLowerCase().includes(q)
+      )
+    }
+
     return result
-  }, [frames, visibleIds, sortConfig])
+  }, [frames, visibleIds, sortConfig, searchQuery, dbcData])
 
   // Flatten frames + expanded signal sub-rows into a single list for the virtualizer
   const flatItems = useMemo<FlatItem[]>(() => {
@@ -164,6 +175,14 @@ function FrameTable({ frames, filename, skippedLines, dbcData }: FrameTableProps
             {skippedLines > 0 && ` · ${skippedLines} skipped`}
           </span>
         </div>
+
+        <input
+          className="frame-table-search"
+          type="search"
+          placeholder="Search…"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+        />
 
         <div className="frame-table-right-controls">
           <button

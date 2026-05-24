@@ -2,17 +2,20 @@ import { useEffect, useRef } from 'react'
 import uPlot from 'uplot'
 import 'uplot/dist/uPlot.min.css'
 import type { DisplayMode, Signal } from '../types'
-import { BYTE_COLORS } from '../utils/chartColors'
 
-const THEME = {
-  border:    '#D5D3CE',
-  textMuted: '#89877F',
+function getTheme() {
+  const s = getComputedStyle(document.documentElement)
+  return {
+    border:    s.getPropertyValue('--color-border').trim()     || '#D5D3CE',
+    textMuted: s.getPropertyValue('--color-text-muted').trim() || '#89877F',
+  }
 }
 
 interface UPlotChartProps {
   data: uPlot.AlignedData
   signals: Signal[]
   displayMode: DisplayMode
+  themeKey: string
 }
 
 function wheelZoomPlugin(): uPlot.Plugin {
@@ -76,8 +79,8 @@ function panPlugin(): uPlot.Plugin {
 function buildSeries(signals: Signal[], displayMode: DisplayMode): uPlot.Series[] {
   return [
     { label: 'Time (s)' },
-    ...signals.map((signal, i) => {
-      const color = BYTE_COLORS[i % BYTE_COLORS.length]
+    ...signals.map((signal) => {
+      const color = signal.color
       return {
         label: `${signal.id} B${signal.byteIndex}`,
         stroke: color,
@@ -95,7 +98,7 @@ function buildSeries(signals: Signal[], displayMode: DisplayMode): uPlot.Series[
   ]
 }
 
-function UPlotChart({ data, signals, displayMode }: UPlotChartProps) {
+function UPlotChart({ data, signals, displayMode, themeKey }: UPlotChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const plotRef = useRef<uPlot | null>(null)
 
@@ -103,6 +106,7 @@ function UPlotChart({ data, signals, displayMode }: UPlotChartProps) {
     const container = containerRef.current
     if (!container) return
 
+    const theme = getTheme()
     const opts: uPlot.Options = {
       width:  container.clientWidth,
       height: container.clientHeight,
@@ -111,15 +115,15 @@ function UPlotChart({ data, signals, displayMode }: UPlotChartProps) {
       series: buildSeries(signals, displayMode),
       axes: [
         {
-          stroke: THEME.textMuted,
-          ticks: { stroke: THEME.border },
-          grid:  { stroke: THEME.border, width: 1 },
+          stroke: theme.textMuted,
+          ticks: { stroke: theme.border },
+          grid:  { stroke: theme.border, width: 1 },
           label: 'Time (s)',
         },
         {
-          stroke: THEME.textMuted,
-          ticks:  { stroke: THEME.border },
-          grid:   { stroke: THEME.border, width: 1 },
+          stroke: theme.textMuted,
+          ticks:  { stroke: theme.border },
+          grid:   { stroke: theme.border, width: 1 },
           label:  'Value (0–255)',
           size:   55,
           splits: (_u, _axisIdx, scaleMin, scaleMax, foundIncr) => {
@@ -148,7 +152,7 @@ function UPlotChart({ data, signals, displayMode }: UPlotChartProps) {
       plotRef.current = null
       ro.disconnect()
     }
-  }, [data, signals, displayMode])
+  }, [data, signals, displayMode, themeKey])
 
   return <div ref={containerRef} className="uplot-container" />
 }

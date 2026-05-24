@@ -7,9 +7,12 @@ import type { DbcData, DbcSignal } from '../parsers/dbc'
 import { getMessageName } from '../utils/dbc'
 import { buildUPlotData, buildDbcSignalData } from '../utils/buildChartData'
 
-const THEME = {
-  border:    '#D5D3CE',
-  textMuted: '#89877F',
+function getTheme() {
+  const s = getComputedStyle(document.documentElement)
+  return {
+    border:    s.getPropertyValue('--color-border').trim()     || '#D5D3CE',
+    textMuted: s.getPropertyValue('--color-text-muted').trim() || '#89877F',
+  }
 }
 
 interface SignalPanelProps {
@@ -18,6 +21,7 @@ interface SignalPanelProps {
   dbcData: DbcData | null
   color: string
   syncKey: string
+  themeKey: string
   onRemove: () => void
   onReady: (u: uPlot) => void
   onDestroy: (u: uPlot) => void
@@ -89,7 +93,7 @@ type DisplayMode = 'line' | 'points' | 'both'
 const DISPLAY_MODES: DisplayMode[] = ['line', 'points', 'both']
 const DISPLAY_MODE_LABEL: Record<DisplayMode, string> = { line: 'LINE', points: 'DOTS', both: 'BOTH' }
 
-function SignalPanel({ panel, frames, dbcData, color, syncKey, onRemove, onReady, onDestroy, onScaleChange }: SignalPanelProps) {
+function SignalPanel({ panel, frames, dbcData, color, syncKey, themeKey, onRemove, onReady, onDestroy, onScaleChange }: SignalPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const plotRef      = useRef<uPlot | null>(null)
   const valueRef     = useRef<HTMLSpanElement>(null)
@@ -124,6 +128,7 @@ function SignalPanel({ panel, frames, dbcData, color, syncKey, onRemove, onReady
     const container = containerRef.current
     if (!container) return
 
+    const theme    = getTheme()
     const unit      = dbcSignal?.unit ?? ''
     const valuesMap = dbcSignal?.values
 
@@ -168,8 +173,8 @@ function SignalPanel({ panel, frames, dbcData, color, syncKey, onRemove, onReady
         },
       ],
       axes: [
-        { stroke: THEME.textMuted, ticks: { stroke: THEME.border }, grid: { stroke: THEME.border, width: 1 } },
-        { stroke: THEME.textMuted, ticks: { stroke: THEME.border }, grid: { stroke: THEME.border, width: 1 }, size: 55 },
+        { stroke: theme.textMuted, ticks: { stroke: theme.border }, grid: { stroke: theme.border, width: 1 } },
+        { stroke: theme.textMuted, ticks: { stroke: theme.border }, grid: { stroke: theme.border, width: 1 }, size: 55 },
       ],
       scales: { y: { auto: true } },
       legend: { show: false },
@@ -188,7 +193,7 @@ function SignalPanel({ panel, frames, dbcData, color, syncKey, onRemove, onReady
       if (plotRef.current) { onDestroy(plotRef.current); plotRef.current.destroy(); plotRef.current = null }
       ro.disconnect()
     }
-  }, [data, syncKey, color, dbcSignal, displayMode])
+  }, [data, syncKey, color, dbcSignal, displayMode, themeKey])
 
   return (
     <div className="signal-panel">

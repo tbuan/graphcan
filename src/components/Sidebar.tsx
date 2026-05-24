@@ -8,7 +8,7 @@ import type { DbcData } from '../parsers/dbc'
 interface SidebarProps {
   importedFile: ImportedFile | null
   dbcData: DbcData | null
-  onAddSignal: (signal: Signal) => void
+  onAddSignal: (signal: Omit<Signal, 'color'>) => void
   onAddPanel: (id: string, source: AnalysisPanelSource) => void
 }
 
@@ -36,6 +36,23 @@ function Sidebar({ importedFile, dbcData, onAddSignal, onAddPanel }: SidebarProp
     return Object.entries(counts)
       .map(([id, count]) => ({ id, count, dlc: dlcs[id] ?? 8 }))
       .sort((a, b) => a.id.localeCompare(b.id))
+  }, [importedFile])
+
+  const cycleTimes = useMemo(() => {
+    if (!importedFile) return {} as Record<string, number>
+    const tsByid: Record<string, number[]> = {}
+    for (const frame of importedFile.result.frames) {
+      if (!tsByid[frame.id]) tsByid[frame.id] = []
+      tsByid[frame.id].push(parseTimestampToMs(frame.timestamp))
+    }
+    const result: Record<string, number> = {}
+    for (const [id, ts] of Object.entries(tsByid)) {
+      if (ts.length < 2) continue
+      let total = 0
+      for (let i = 1; i < ts.length; i++) total += ts[i] - ts[i - 1]
+      result[id] = total / (ts.length - 1)
+    }
+    return result
   }, [importedFile])
 
   const isAnalysis = location.pathname === '/analysis'
@@ -111,6 +128,9 @@ function Sidebar({ importedFile, dbcData, onAddSignal, onAddPanel }: SidebarProp
                 <span className="sidebar-id-value" title={id}>
                   {getMessageLabel(id, dbcData)}
                 </span>
+                {cycleTimes[id] !== undefined && (
+                  <span className="sidebar-id-cycle">{cycleTimes[id].toFixed(1)} ms</span>
+                )}
                 <span className="sidebar-id-count">{count}</span>
                 <button
                   className="sidebar-id-add"
