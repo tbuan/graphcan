@@ -1,10 +1,17 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { SerialPortState } from '../hooks/useSerialPort'
 import type { WsPortState }    from '../hooks/useWebSocketPort'
 import { CAN_SPEEDS, type CanSpeed } from '../parsers/slcan'
 import LiveTable, { type LiveViewMode } from '../components/LiveTable'
 import type { DbcData }  from '../parsers/dbc'
 import type { CanFrame } from '../parsers/busmaster'
+import { getMessageName }  from '../utils/dbc'
+
+function normalizeFrameId(hexId: string): string {
+  const num = parseInt(hexId, 16)
+  if (isNaN(num)) return hexId.toUpperCase()
+  return '0x' + (num & 0x1fffffff).toString(16).toUpperCase()
+}
 
 interface LiveViewProps {
   dbcData: DbcData | null
@@ -47,6 +54,58 @@ function LiveView({ dbcData, serial, ws }: LiveViewProps) {
   const [autoScroll, setAutoScroll] = useState(true)
   const [paused,     setPaused]     = useState(false)
   const [frozenFrames, setFrozenFrames] = useState<CanFrame[]>([])
+
+  // ── Filter state ───────────────────────────────────────────────────────────
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
+  const [hiddenIds,       setHiddenIds]       = useState<Set<string>>(new Set())
+  const [pinnedIds,       setPinnedIds]       = useState<string[]>([])
+  const [manualInput,     setManualInput]     = useState('')
+
+  const seenIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const f of frames as CanFrame[]) ids.add(normalizeFrameId(f.id))
+    return ids
+  }, [frames])
+
+  const allPanelIds = useMemo(
+    () => Array.from(new Set([...seenIds, ...pinnedIds])).sort(),
+    [seenIds, pinnedIds],
+  )
+
+  function getFilterLabel(normalizedId: string): string {
+    if (!dbcData) return ''
+    const key  = '0X' + normalizedId.slice(2)
+    const name = getMessageName(key, dbcData)
+    return name !== key ? name : ''
+  }
+
+  function toggleHidden(id: string) {
+    setHiddenIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function handleAddManual() {
+    const raw = manualInput.trim()
+    if (!raw) return
+    const num = parseInt(raw.replace(/^0x/i, ''), 16)
+    if (isNaN(num)) return
+    const normalized = '0x' + (num & 0x1fffffff).toString(16).toUpperCase()
+    if (!seenIds.has(normalized) && !pinnedIds.includes(normalized)) {
+      setPinnedIds(prev => [...prev, normalized])
+    }
+    setManualInput('')
+  }
+
+  function removePinned(id: string) {
+    setPinnedIds(prev => prev.filter(p => p !== id))
+    setHiddenIds(prev => { const n = new Set(prev); n.delete(id); return n })
+  }
+
+  function handleShowAll() { setHiddenIds(new Set()) }
+  function handleHideAll()  { setHiddenIds(new Set(allPanelIds)) }
 
   const displayFrames = paused ? frozenFrames : (frames as CanFrame[])
 
@@ -226,6 +285,14 @@ function LiveView({ dbcData, serial, ws }: LiveViewProps) {
           </button>
 
           <button
+            className={`live-btn-filter ${filterPanelOpen ? 'active' : ''} ${hiddenIds.size > 0 ? 'live-btn-filter-on' : ''}`}
+            onClick={() => setFilterPanelOpen(o => !o)}
+            title="Message filter"
+          >
+            Filter{hiddenIds.size > 0 ? ` (${allPanelIds.length - hiddenIds.size}/${allPanelIds.length})` : ''}
+          </button>
+
+          <button
             className="live-btn-disconnect"
             onClick={disconnect}
             disabled={isConnecting}
@@ -234,6 +301,61 @@ function LiveView({ dbcData, serial, ws }: LiveViewProps) {
           </button>
         </div>
       </div>
+
+      {filterPanelOpen && (
+        <div className="live-filter-panel">
+          <div className="lfp-toolbar">
+            <div className="lfp-add">
+              <input
+                className="lfp-add-input"
+                type="text"
+                placeholder="Add ID (e.g. 0x1A2B3C4D)"
+                value={manualInput}
+                onChange={e => setManualInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleAddManual() }}
+              />
+              <button className="lfp-add-btn" onClick={handleAddManual}>Add</button>
+            </div>
+            <div className="lfp-bulk">
+              <button onClick={handleShowAll}>Show all</button>
+              <button onClick={handleHideAll}>Hide all</button>
+            </div>
+          </div>
+
+          <div className="lfp-list">
+            {allPanelIds.length === 0 ? (
+              <span className="lfp-empty">No messages yet — add an ID above or wait for frames</span>
+            ) : (
+              allPanelIds.map(id => {
+                const isSeen   = seenIds.has(id)
+                const isHidden = hiddenIds.has(id)
+                const label    = getFilterLabel(id)
+                return (
+                  <label key={id} className={`lfp-item ${isHidden ? 'lfp-item-hidden' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={!isHidden}
+                      onChange={() => toggleHidden(id)}
+                    />
+                    <span className="lfp-id">{id}</span>
+                    {label && <span className="lfp-name">{label}</span>}
+                    {!isSeen && (
+                      <>
+                        <span className="lfp-badge">not seen</span>
+                        <button
+                          className="lfp-remove"
+                          onClick={e => { e.preventDefault(); removePinned(id) }}
+                          title="Remove"
+                        >×</button>
+                      </>
+                    )}
+                  </label>
+                )
+              })
+            )}
+          </div>
+        </div>
+      )}
 
       {displayFrames.length === 0 ? (
         <p className="main-placeholder">
@@ -247,6 +369,7 @@ function LiveView({ dbcData, serial, ws }: LiveViewProps) {
           dbcData={dbcData}
           mode={viewMode}
           autoScroll={autoScroll}
+          hiddenIds={hiddenIds}
         />
       )}
     </div>

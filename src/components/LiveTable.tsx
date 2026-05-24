@@ -12,6 +12,7 @@ interface Props {
   dbcData:    DbcData | null
   mode:       LiveViewMode
   autoScroll: boolean
+  hiddenIds:  Set<string>
 }
 
 interface UniqueRow {
@@ -41,7 +42,14 @@ function getMsgSignals(hexId: string, dbc: DbcData | null): DbcSignal[] {
 
 const TRACE_MAX = 500
 
-export default function LiveTable({ frames, dbcData, mode, autoScroll }: Props) {
+function matchesFilter(frame: CanFrame, hiddenIds: Set<string>): boolean {
+  if (hiddenIds.size === 0) return true
+  const num        = parseInt(frame.id, 16)
+  const normalized = '0x' + (num & 0x1fffffff).toString(16).toUpperCase()
+  return !hiddenIds.has(normalized)
+}
+
+export default function LiveTable({ frames, dbcData, mode, autoScroll, hiddenIds }: Props) {
   const showName = dbcData !== null
 
   // ── Trace: auto-scroll ───────────────────────────────────────────────────
@@ -98,7 +106,8 @@ export default function LiveTable({ frames, dbcData, mode, autoScroll }: Props) 
 
   // ── Unique view ──────────────────────────────────────────────────────────
   if (mode === 'unique') {
-    const colCount = 6 + (showName ? 1 : 0)
+    const colCount    = 6 + (showName ? 1 : 0)
+    const filteredRows = uniqueRows.filter(({ frame }) => matchesFilter(frame, hiddenIds))
 
     return (
       <div className="live-table-wrap">
@@ -115,7 +124,7 @@ export default function LiveTable({ frames, dbcData, mode, autoScroll }: Props) 
             </tr>
           </thead>
           <tbody>
-            {uniqueRows.map(({ frame, count, cycleMs }) => {
+            {filteredRows.map(({ frame, count, cycleMs }) => {
               const isExpanded = expandedIds.has(frame.id)
               const signals    = getMsgSignals(frame.id, dbcData)
 
@@ -173,8 +182,9 @@ export default function LiveTable({ frames, dbcData, mode, autoScroll }: Props) 
   }
 
   // ── Trace view ───────────────────────────────────────────────────────────
-  const visible   = frames.slice(-TRACE_MAX)
-  const baseIndex = frames.length - visible.length
+  const recent    = frames.slice(-TRACE_MAX)
+  const visible   = recent.filter(f => matchesFilter(f, hiddenIds))
+  const baseIndex = frames.length - recent.length
 
   return (
     <div className="live-table-wrap" ref={traceWrapRef}>

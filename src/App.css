@@ -1555,6 +1555,155 @@
 .lt-signal-unit { color: var(--color-text-muted); font-size: 10px; }
 .lt-signal-empty { font-size: 11px; color: var(--color-text-muted); font-style: italic; }
 
+/* ── Filter button in topbar ──────────────────────────────────────────────── */
+.live-btn-filter {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.live-btn-filter:hover,
+.live-btn-filter.active {
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+.live-btn-filter.live-btn-filter-on {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* ── Filter panel ─────────────────────────────────────────────────────────── */
+.live-filter-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  max-height: 260px;
+}
+
+.lfp-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.lfp-add {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.lfp-add-input {
+  flex: 1;
+  max-width: 240px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 12px;
+  font-family: monospace;
+  outline: none;
+}
+.lfp-add-input:focus { border-color: var(--color-accent); }
+
+.lfp-add-btn {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: none;
+  color: var(--color-text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.lfp-add-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+.lfp-bulk {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.lfp-bulk button {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.lfp-bulk button:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+
+.lfp-list {
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  padding: 6px 12px;
+  align-content: flex-start;
+}
+
+.lfp-empty {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: 4px 0;
+}
+
+.lfp-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  min-width: 180px;
+  user-select: none;
+  transition: background 0.1s;
+}
+.lfp-item:hover { background: var(--color-surface-alt); }
+.lfp-item input[type="checkbox"] { cursor: pointer; accent-color: var(--color-accent); }
+
+.lfp-item-hidden { opacity: 0.45; }
+
+.lfp-id   { font-family: monospace; color: var(--color-text); }
+.lfp-name { color: var(--color-text-muted); font-size: 11px; }
+
+.lfp-badge {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-style: italic;
+}
+
+.lfp-remove {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.lfp-remove:hover { color: var(--color-text); }
+
 .signal-panel-mode {
   background: none;
   border: 1px solid var(--color-border);
