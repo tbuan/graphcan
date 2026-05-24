@@ -103,3 +103,5 @@ export function useWebSocketPort() {
 
   return { status, error, frames, frameRate, connect, disconnect, clearFrames }
 }
+
+export type WsPortState = ReturnType<typeof useWebSocketPort>

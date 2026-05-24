@@ -159,3 +159,5 @@ export function useSerialPort() {
 
   return { status, error, frames, frameRate, connect, disconnect, clearFrames }
 }
+
+export type SerialPortState = ReturnType<typeof useSerialPort>

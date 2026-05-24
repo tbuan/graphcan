@@ -1102,7 +1102,9 @@
 .live-view {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  width: 100%;
+  height: 100%;
+  align-self: stretch;
   overflow: hidden;
   min-height: 0;
 }
@@ -1379,6 +1381,141 @@
   color: var(--color-text);
   white-space: nowrap;
 }
+
+/* ── Live view controls ─────────────────────────────────────── */
+
+.live-view-toggle {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.live-view-toggle button {
+  background: none;
+  border: none;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  transition: all 0.15s;
+}
+
+.live-view-toggle button:last-child { border-right: none; }
+.live-view-toggle button:hover      { color: var(--color-text); background: var(--color-bg-secondary); }
+
+.live-view-toggle button.active {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.live-btn-autoscroll {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 3px 8px;
+  transition: all 0.15s;
+}
+
+.live-btn-autoscroll:hover  { border-color: var(--color-text-muted); color: var(--color-text); }
+.live-btn-autoscroll.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+
+.live-btn-pause {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  transition: all 0.15s;
+}
+
+.live-btn-pause:hover:not(:disabled) { border-color: #fbbf24; color: #fbbf24; }
+.live-btn-pause.active { background: color-mix(in srgb, #fbbf24 15%, transparent); border-color: #fbbf24; color: #fbbf24; }
+.live-btn-pause:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Live table ─────────────────────────────────────────────── */
+
+.live-table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  min-height: 0;
+  background: var(--color-surface);
+}
+
+.live-table-notice {
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.live-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 12px;
+}
+
+.live-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface-alt);
+  padding: 7px 8px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border);
+  white-space: nowrap;
+}
+
+
+.live-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.live-table tbody tr:nth-child(even) {
+  background: var(--color-surface-alt);
+}
+
+.live-table tbody tr:hover {
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+}
+
+.live-table td {
+  padding: 5px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.lt-mono { font-family: monospace; letter-spacing: 0.02em; }
+
+/* Column widths */
+.lt-time  { width: 108px; }
+.lt-id    { width: 100px; }
+.lt-name  { width: 160px; color: var(--color-text-muted); font-size: 11px; }
+.lt-dir   { width: 34px;  color: var(--color-text-muted); text-align: center; }
+.lt-count { width: 72px;  text-align: right; color: var(--color-text-muted); }
+.lt-cycle { width: 80px;  text-align: right; }
+.lt-dlc   { width: 34px;  text-align: center; color: var(--color-text-muted); }
+.lt-data  { color: var(--color-accent); }
 
 .signal-panel-mode {
   background: none;
