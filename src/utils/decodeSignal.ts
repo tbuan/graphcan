@@ -67,3 +67,10 @@ export function decodeRawInt(data: number[], signal: DbcSignal): number {
 
   return rawValue
 }
+
+/** Format a decoded physical value: enum label > decimal > integer. */
+export function formatSignalValue(physicalValue: number, signal: DbcSignal): string {
+  const rawInt = Math.round((physicalValue - signal.offset) / signal.factor)
+  if (signal.values?.[rawInt] !== undefined) return signal.values[rawInt]
+  return signal.factor % 1 !== 0 ? physicalValue.toFixed(2) : String(Math.round(physicalValue))
+}

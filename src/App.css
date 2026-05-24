@@ -1508,6 +1508,7 @@
 .lt-mono { font-family: monospace; letter-spacing: 0.02em; }
 
 /* Column widths */
+.lt-expand { width: 28px; text-align: center; padding: 0 4px !important; }
 .lt-time  { width: 108px; }
 .lt-id    { width: 100px; }
 .lt-name  { width: 160px; color: var(--color-text-muted); font-size: 11px; }
@@ -1516,6 +1517,43 @@
 .lt-cycle { width: 80px;  text-align: right; }
 .lt-dlc   { width: 34px;  text-align: center; color: var(--color-text-muted); }
 .lt-data  { color: var(--color-accent); }
+
+/* Expand arrow */
+.lt-arrow {
+  display: inline-block;
+  font-size: 9px;
+  color: var(--color-text-muted);
+  transition: transform 0.15s;
+  user-select: none;
+}
+.lt-arrow-open { transform: rotate(90deg); }
+
+.lt-row-expanded > td { background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface)) !important; }
+
+/* Signal sub-row */
+.lt-signal-row > td {
+  padding: 10px 12px 10px 44px !important;
+  background: color-mix(in srgb, var(--color-accent) 4%, var(--color-surface-alt));
+  border-bottom: 2px solid var(--color-border);
+}
+
+.lt-signal-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+}
+
+.lt-signal-item {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.lt-signal-name { color: var(--color-text-muted); font-weight: 500; }
+.lt-signal-val  { font-family: monospace; color: var(--color-text); font-weight: 600; }
+.lt-signal-unit { color: var(--color-text-muted); font-size: 10px; }
+.lt-signal-empty { font-size: 11px; color: var(--color-text-muted); font-style: italic; }
 
 .signal-panel-mode {
   background: none;
