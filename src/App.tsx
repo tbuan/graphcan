@@ -6,6 +6,7 @@ import NavTabs from './components/NavTabs'
 import TableView from './views/TableView'
 import ChartView from './views/ChartView'
 import AnalysisView from './views/AnalysisView'
+import LiveView from './views/LiveView'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
 import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig, saveAnalysisPanels, loadAnalysisPanels } from './utils/storage'
 import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
@@ -189,6 +190,7 @@ function App() {
               <Route path="/analysis" element={
                 <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} onRemovePanel={handleRemovePanel} themeKey={darkMode ? 'dark' : 'light'} />
               } />
+              <Route path="/live" element={<LiveView dbcData={dbcData} />} />
             </Routes>
           </main>
         </div>

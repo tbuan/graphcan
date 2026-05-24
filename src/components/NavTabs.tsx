@@ -4,6 +4,7 @@ const TABS = [
   { path: '/table',    label: 'Table'    },
   { path: '/chart',    label: 'Chart'    },
   { path: '/analysis', label: 'Analysis' },
+  { path: '/live',     label: 'Live'     },
 ]
 
 function NavTabs() {
