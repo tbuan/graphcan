@@ -6,6 +6,7 @@ const TABS = [
   { path: '/analysis', label: 'Analysis' },
   { path: '/stats',    label: 'Stats'    },
   { path: '/scatter',  label: 'Scatter'  },
+  { path: '/dbc',      label: 'DBC'      },
 ]
 
 function NavTabs() {

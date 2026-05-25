@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import NavTabs from './components/NavTabs'
@@ -8,6 +8,7 @@ import ChartView from './views/ChartView'
 import AnalysisView from './views/AnalysisView'
 import StatsView from './views/StatsView'
 import ScatterView from './views/ScatterView'
+import DbcView from './views/DbcView'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
 import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig, saveAnalysisPanels, loadAnalysisPanels } from './utils/storage'
 import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
@@ -34,9 +35,12 @@ function App() {
   const [analysisPanels, setAnalysisPanels] = useState<AnalysisPanel[]>(
     () => loadAnalysisPanels() ?? []
   )
-  const [sidebarWidth, setSidebarWidth] = useState(224)
-  const [isParsing, setIsParsing]       = useState(false)
-  const [darkMode, setDarkMode]         = useState(() => localStorage.getItem('graphcan-dark') === 'true')
+  const [sidebarWidth, setSidebarWidth]   = useState(224)
+  const [isParsing, setIsParsing]         = useState(false)
+  const [darkMode, setDarkMode]           = useState(() => localStorage.getItem('graphcan-dark') === 'true')
+  const [dbcSelectedKey, setDbcSelectedKey] = useState<string | null>(null)
+  const [dbcSearch, setDbcSearch]           = useState('')
+  const [dbcSelectedMux, setDbcSelectedMux] = useState<number | 'all'>('all')
 
   // Restore persisted data on mount
   useEffect(() => {
@@ -148,58 +152,74 @@ function App() {
     window.addEventListener('mouseup', onMouseUp)
   }
 
+  const location = useLocation()
+  const isDbcRoute = location.pathname === '/dbc'
+
   return (
-    <BrowserRouter>
-      <div className="app">
-        <Header
-          onFileImport={handleFileImport}
-          onBinaryImport={handleBinaryImport}
-          onDbcImport={handleDbcImport}
-          dbcName={dbcName}
-          onDbcClear={handleDbcClear}
-          isParsing={isParsing}
-          darkMode={darkMode}
-          onDarkModeToggle={() => setDarkMode(d => !d)}
-        />
-        <NavTabs />
-        {isParsing && <div className="loading-bar" />}
-        <div className="app-body">
-          <div className="sidebar-container" style={{ width: sidebarWidth }}>
-            <Sidebar
-              importedFile={importedFile}
-              dbcData={dbcData}
-              onAddSignal={signal => {
-                setChartConfig(prev => {
-                  const exists = prev.signals.some(s => s.id === signal.id && s.byteIndex === signal.byteIndex)
-                  if (exists) return prev
-                  const usedColors = new Set(prev.signals.map(s => s.color))
-                  const color = BYTE_COLORS.find(c => !usedColors.has(c)) ?? BYTE_COLORS[prev.signals.length % BYTE_COLORS.length]
-                  return { ...prev, signals: [...prev.signals, { ...signal, color }] }
-                })
-              }}
-              onAddPanel={handleAddPanel}
-            />
-          </div>
-          <div className="resize-handle" onMouseDown={handleResizeStart} />
-          <main className="main-content">
-            <Routes>
-              <Route path="/" element={<Navigate to="/table" replace />} />
-              <Route path="/table" element={<TableView importedFile={importedFile} dbcData={dbcData} />} />
-              <Route path="/chart" element={
-                <ChartView importedFile={importedFile} dbcData={dbcData} dbcName={dbcName} config={chartConfig} onConfigChange={setChartConfig} themeKey={darkMode ? 'dark' : 'light'} />
+    <div className="app">
+      <Header
+        onFileImport={handleFileImport}
+        onBinaryImport={handleBinaryImport}
+        onDbcImport={handleDbcImport}
+        dbcName={dbcName}
+        onDbcClear={handleDbcClear}
+        isParsing={isParsing}
+        darkMode={darkMode}
+        onDarkModeToggle={() => setDarkMode(d => !d)}
+      />
+      <NavTabs />
+      {isParsing && <div className="loading-bar" />}
+      <div className="app-body">
+        {!isDbcRoute && (
+          <>
+            <div className="sidebar-container" style={{ width: sidebarWidth }}>
+              <Sidebar
+                importedFile={importedFile}
+                dbcData={dbcData}
+                onAddSignal={signal => {
+                  setChartConfig(prev => {
+                    const exists = prev.signals.some(s => s.id === signal.id && s.byteIndex === signal.byteIndex)
+                    if (exists) return prev
+                    const usedColors = new Set(prev.signals.map(s => s.color))
+                    const color = BYTE_COLORS.find(c => !usedColors.has(c)) ?? BYTE_COLORS[prev.signals.length % BYTE_COLORS.length]
+                    return { ...prev, signals: [...prev.signals, { ...signal, color }] }
+                  })
+                }}
+                onAddPanel={handleAddPanel}
+              />
+            </div>
+            <div className="resize-handle" onMouseDown={handleResizeStart} />
+          </>
+        )}
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Navigate to="/table" replace />} />
+            <Route path="/table" element={<TableView importedFile={importedFile} dbcData={dbcData} />} />
+            <Route path="/chart" element={
+              <ChartView importedFile={importedFile} dbcData={dbcData} dbcName={dbcName} config={chartConfig} onConfigChange={setChartConfig} themeKey={darkMode ? 'dark' : 'light'} />
+            } />
+            <Route path="/stats" element={<StatsView importedFile={importedFile} dbcData={dbcData} />} />
+            <Route path="/analysis" element={
+              <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} dbcName={dbcName} onRemovePanel={handleRemovePanel} themeKey={darkMode ? 'dark' : 'light'} />
+            } />
+            <Route path="/scatter" element={
+              <ScatterView importedFile={importedFile} dbcData={dbcData} themeKey={darkMode ? 'dark' : 'light'} />
+            } />
+            <Route path="/dbc" element={
+                <DbcView
+                  dbcData={dbcData}
+                  selectedKey={dbcSelectedKey}
+                  onSelectKey={setDbcSelectedKey}
+                  search={dbcSearch}
+                  onSearch={setDbcSearch}
+                  selectedMux={dbcSelectedMux}
+                  onSelectMux={setDbcSelectedMux}
+                />
               } />
-              <Route path="/stats" element={<StatsView importedFile={importedFile} dbcData={dbcData} />} />
-              <Route path="/analysis" element={
-                <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} dbcName={dbcName} onRemovePanel={handleRemovePanel} themeKey={darkMode ? 'dark' : 'light'} />
-              } />
-              <Route path="/scatter" element={
-                <ScatterView importedFile={importedFile} dbcData={dbcData} themeKey={darkMode ? 'dark' : 'light'} />
-              } />
-            </Routes>
-          </main>
-        </div>
+          </Routes>
+        </main>
       </div>
-    </BrowserRouter>
+    </div>
   )
 }
 
