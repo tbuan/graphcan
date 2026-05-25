@@ -23,6 +23,11 @@ export type AnalysisPanelSource =
   | { kind: 'byte';   byteIndex: number }
   | { kind: 'signal'; signalName: string }
 
+export interface Annotation {
+  t: number
+  label: string
+}
+
 export interface AnalysisPanel {
   uid: string
   id: string

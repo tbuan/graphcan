@@ -1,7 +1,7 @@
 import type uPlot from 'uplot'
 import type { CanFrame } from '../parsers/busmaster'
-import type { DbcSignal } from '../parsers/dbc'
-import type { Signal } from '../types'
+import type { DbcSignal, DbcData } from '../parsers/dbc'
+import type { Signal, AnalysisPanel } from '../types'
 import { parseTimestampToMs } from './time'
 import { decodeSignal } from './decodeSignal'
 
@@ -50,6 +50,56 @@ export function buildUPlotData(
   })
 
   return [xAxis, ...series]
+}
+
+// Builds minimap overview data for all AnalysisView panels.
+// Each signal is normalized to [0, 1] so different value ranges overlay cleanly.
+// Time axis is 0-based (seconds from first frame in the file).
+export function buildOverviewData(
+  frames: CanFrame[],
+  panels: AnalysisPanel[],
+  dbcData: DbcData | null,
+): uPlot.AlignedData {
+  if (!frames.length || !panels.length) return [[0, 1]]
+
+  const t0Abs = parseTimestampToMs(frames[0].timestamp)
+  const allTs = new Set<number>()
+  const maps: Map<number, number>[] = []
+
+  for (const panel of panels) {
+    const relevant = frames.filter(f => f.id === panel.id)
+    const sampled  = downsample(relevant, 500)
+    if (!sampled.length) { maps.push(new Map()); continue }
+
+    const rawPairs: [number, number][] = []
+    for (const f of sampled) {
+      const ts = parseTimestampToMs(f.timestamp)
+      let val: number
+      if (panel.source.kind === 'byte') {
+        val = parseInt(f.data[panel.source.byteIndex] ?? '0', 16)
+      } else {
+        const sig = dbcData?.[panel.id]?.signals.find(s => s.name === panel.source.signalName)
+        val = sig ? decodeSignal(f.data.map(b => parseInt(b, 16)), sig) : 0
+      }
+      rawPairs.push([ts, val])
+      allTs.add(ts)
+    }
+
+    // Normalize to [0, 1] so all signals overlay regardless of unit
+    const vals  = rawPairs.map(([, v]) => v)
+    const yMin  = Math.min(...vals)
+    const yMax  = Math.max(...vals)
+    const range = Math.max(yMax - yMin, 0.001)
+    const tsMap = new Map<number, number>()
+    for (const [ts, v] of rawPairs) tsMap.set(ts, (v - yMin) / range)
+    maps.push(tsMap)
+  }
+
+  const sortedTs = Array.from(allTs).sort((a, b) => a - b)
+  const xAxis   = sortedTs.map(ts => (ts - t0Abs) / 1000)
+  const series  = maps.map(m => sortedTs.map(ts => m.get(ts) ?? null))
+
+  return [xAxis, ...series] as uPlot.AlignedData
 }
 
 export function buildDbcSignalData(

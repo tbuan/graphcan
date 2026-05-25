@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo, useState } from 'react'
 import uPlot from 'uplot'
 import 'uplot/dist/uPlot.min.css'
-import type { AnalysisPanel } from '../types'
+import type { AnalysisPanel, Annotation } from '../types'
 import type { CanFrame } from '../parsers/busmaster'
 import type { DbcData, DbcSignal } from '../parsers/dbc'
 import { getMessageName } from '../utils/dbc'
@@ -22,6 +22,9 @@ interface SignalPanelProps {
   color: string
   syncKey: string
   themeKey: string
+  annotations?: Annotation[]
+  onAnnotationAdd?: (t: number) => void
+  onAnnotationRemove?: (t: number) => void
   onRemove: () => void
   onReady: (u: uPlot) => void
   onDestroy: (u: uPlot) => void
@@ -31,7 +34,7 @@ interface SignalPanelProps {
 function wheelZoomPlugin(onScaleChange: SignalPanelProps['onScaleChange']): uPlot.Plugin {
   return {
     hooks: {
-      ready(u: uPlot) {
+      ready(u) {
         u.over.addEventListener('wheel', (e: WheelEvent) => {
           if (!e.ctrlKey) return
           e.preventDefault()
@@ -55,7 +58,7 @@ function wheelZoomPlugin(onScaleChange: SignalPanelProps['onScaleChange']): uPlo
 function panPlugin(onScaleChange: SignalPanelProps['onScaleChange']): uPlot.Plugin {
   return {
     hooks: {
-      ready(u: uPlot) {
+      ready(u) {
         u.over.addEventListener('mousedown', (e: MouseEvent) => {
           if (e.button !== 1) return
           e.preventDefault()
@@ -72,14 +75,12 @@ function panPlugin(onScaleChange: SignalPanelProps['onScaleChange']): uPlot.Plug
             u.setScale('x', { min, max })
             onScaleChange(u, min, max)
           }
-
           function onMouseUp(ev: MouseEvent) {
             if (ev.button !== 1) return
             window.removeEventListener('mousemove', onMouseMove)
             window.removeEventListener('mouseup', onMouseUp)
             u.over.style.cursor = ''
           }
-
           window.addEventListener('mousemove', onMouseMove)
           window.addEventListener('mouseup', onMouseUp)
         })
@@ -93,10 +94,22 @@ type DisplayMode = 'line' | 'points' | 'both'
 const DISPLAY_MODES: DisplayMode[] = ['line', 'points', 'both']
 const DISPLAY_MODE_LABEL: Record<DisplayMode, string> = { line: 'LINE', points: 'DOTS', both: 'BOTH' }
 
-function SignalPanel({ panel, frames, dbcData, color, syncKey, themeKey, onRemove, onReady, onDestroy, onScaleChange }: SignalPanelProps) {
+function SignalPanel({
+  panel, frames, dbcData, color, syncKey, themeKey,
+  annotations, onAnnotationAdd, onAnnotationRemove,
+  onRemove, onReady, onDestroy, onScaleChange,
+}: SignalPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const plotRef      = useRef<uPlot | null>(null)
   const valueRef     = useRef<HTMLSpanElement>(null)
+
+  // Always-fresh refs for callbacks used inside uPlot hooks
+  const annRef      = useRef<Annotation[]>(annotations ?? [])
+  const onAddRef    = useRef(onAnnotationAdd)
+  const onRemoveRef = useRef(onAnnotationRemove)
+  annRef.current      = annotations ?? []
+  onAddRef.current    = onAnnotationAdd
+  onRemoveRef.current = onAnnotationRemove
 
   const [displayMode, setDisplayMode] = useState<DisplayMode>('line')
 
@@ -124,6 +137,11 @@ function SignalPanel({ panel, frames, dbcData, color, syncKey, themeKey, onRemov
     return [[], []] as uPlot.AlignedData
   }, [frames, panel.id, panel.source, dbcSignal])
 
+  // Redraw when annotations change, without recreating the plot
+  useEffect(() => {
+    plotRef.current?.redraw(false)
+  }, [annotations])
+
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
@@ -150,13 +168,36 @@ function SignalPanel({ panel, frames, dbcData, color, syncKey, themeKey, onRemov
           if (idx == null) { valueRef.current.textContent = '—'; return }
           const val = (u.data[1] as (number | null)[])[idx]
           if (val == null) { valueRef.current.textContent = '—'; return }
-          const label = valuesMap?.[Math.round(val)]
-          if (label !== undefined) {
-            valueRef.current.textContent = label
+          const mapped = valuesMap?.[Math.round(val)]
+          if (mapped !== undefined) {
+            valueRef.current.textContent = mapped
           } else {
             const formatted = Number.isInteger(val) ? String(val) : parseFloat(val.toPrecision(6)).toString()
             valueRef.current.textContent = unit ? `${formatted} ${unit}` : formatted
           }
+        }],
+        draw: [(u) => {
+          const anns = annRef.current
+          if (!anns.length) return
+          const ctx = u.ctx
+          const dpr = window.devicePixelRatio || 1
+          ctx.save()
+          anns.forEach(ann => {
+            const xPx = u.valToPos(ann.t, 'x', true)
+            if (xPx < u.bbox.left || xPx > u.bbox.left + u.bbox.width) return
+            ctx.strokeStyle = '#F59E0B'
+            ctx.setLineDash([4 * dpr, 4 * dpr])
+            ctx.lineWidth = 1.5 * dpr
+            ctx.beginPath()
+            ctx.moveTo(xPx, u.bbox.top)
+            ctx.lineTo(xPx, u.bbox.top + u.bbox.height)
+            ctx.stroke()
+            ctx.setLineDash([])
+            ctx.fillStyle = '#F59E0B'
+            ctx.font = `bold ${10 * dpr}px system-ui, sans-serif`
+            ctx.fillText(ann.label, xPx + 4 * dpr, u.bbox.top + 13 * dpr)
+          })
+          ctx.restore()
         }],
       },
       series: [
@@ -165,11 +206,7 @@ function SignalPanel({ panel, frames, dbcData, color, syncKey, themeKey, onRemov
           label,
           stroke: color,
           width:  displayMode === 'points' ? 0 : 1.5,
-          points: {
-            show: displayMode !== 'line',
-            size: 5,
-            fill: color,
-          },
+          points: { show: displayMode !== 'line', size: 5, fill: color },
         },
       ],
       axes: [
@@ -183,6 +220,18 @@ function SignalPanel({ panel, frames, dbcData, color, syncKey, themeKey, onRemov
     const u = new uPlot(opts, data, container)
     plotRef.current = u
     onReady(u)
+
+    // Shift+click to add/remove annotation
+    u.over.addEventListener('click', (e: MouseEvent) => {
+      if (!e.shiftKey) return
+      const t    = u.posToVal(e.offsetX, 'x')
+      const near = annRef.current.find(a => Math.abs(u.valToPos(a.t, 'x') - e.offsetX) < 10)
+      if (near) onRemoveRef.current?.(near.t)
+      else      onAddRef.current?.(t)
+    })
+    u.over.addEventListener('mousemove', (e: MouseEvent) => {
+      u.over.style.cursor = e.shiftKey ? 'crosshair' : ''
+    })
 
     const ro = new ResizeObserver(() => {
       plotRef.current?.setSize({ width: container.clientWidth, height: container.clientHeight })
