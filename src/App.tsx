@@ -184,10 +184,10 @@ function App() {
               <Route path="/" element={<Navigate to="/table" replace />} />
               <Route path="/table" element={<TableView importedFile={importedFile} dbcData={dbcData} />} />
               <Route path="/chart" element={
-                <ChartView importedFile={importedFile} dbcData={dbcData} config={chartConfig} onConfigChange={setChartConfig} themeKey={darkMode ? 'dark' : 'light'} />
+                <ChartView importedFile={importedFile} dbcData={dbcData} dbcName={dbcName} config={chartConfig} onConfigChange={setChartConfig} themeKey={darkMode ? 'dark' : 'light'} />
               } />
               <Route path="/analysis" element={
-                <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} onRemovePanel={handleRemovePanel} themeKey={darkMode ? 'dark' : 'light'} />
+                <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} dbcName={dbcName} onRemovePanel={handleRemovePanel} themeKey={darkMode ? 'dark' : 'light'} />
               } />
             </Routes>
           </main>

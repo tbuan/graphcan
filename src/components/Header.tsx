@@ -60,7 +60,7 @@ function Header({ onFileImport, onBinaryImport, onDbcImport, dbcName, onDbcClear
         viewBox="0 0 38 22"
         aria-hidden="true"
         fill="none"
-        stroke="#111110"
+        stroke="currentColor"
         strokeWidth="2.2"
         strokeLinecap="square"
         strokeLinejoin="miter"

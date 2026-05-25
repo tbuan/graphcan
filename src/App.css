@@ -80,6 +80,7 @@
 
 .header-logo {
   flex-shrink: 0;
+  color: var(--color-text);
 }
 
 .header-title {
@@ -835,6 +836,14 @@
   min-height: 32px;
 }
 
+.chart-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .chart-controls {
   display: flex;
   align-items: center;
@@ -989,6 +998,28 @@
   box-shadow: var(--shadow-sm);
 }
 
+.btn-export {
+  background: var(--color-text);
+  color: var(--color-surface);
+  border: none;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btn-export:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.btn-export:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 /* uPlot container */
 .uplot-container {
   flex: 1;
@@ -1049,6 +1080,12 @@
   flex-direction: column;
   gap: 10px;
   align-self: flex-start;
+}
+
+.analysis-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .signal-panel {

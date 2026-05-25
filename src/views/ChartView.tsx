@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import UPlotChart from '../components/UPlotChart'
+import { useMemo, useRef } from 'react'
+import UPlotChart, { type UPlotChartHandle } from '../components/UPlotChart'
 import { buildUPlotData } from '../utils/buildChartData'
 import type { ImportedFile, ChartConfig, DisplayMode } from '../types'
 import type { DbcData } from '../parsers/dbc'
@@ -14,13 +14,15 @@ const DISPLAY_MODES: { value: DisplayMode; label: string }[] = [
 interface ChartViewProps {
   importedFile: ImportedFile | null
   dbcData: DbcData | null
+  dbcName: string | null
   config: ChartConfig
   onConfigChange: (config: ChartConfig) => void
   themeKey: string
 }
 
-function ChartView({ importedFile, dbcData, config, onConfigChange, themeKey }: ChartViewProps) {
+function ChartView({ importedFile, dbcData, dbcName, config, onConfigChange, themeKey }: ChartViewProps) {
   const { signals, displayMode } = config
+  const chartRef = useRef<UPlotChartHandle>(null)
 
   const uplotData = useMemo(
     () => buildUPlotData(importedFile?.result.frames ?? [], signals),
@@ -33,6 +35,18 @@ function ChartView({ importedFile, dbcData, config, onConfigChange, themeKey }: 
 
   function setDisplayMode(mode: DisplayMode) {
     onConfigChange({ ...config, displayMode: mode })
+  }
+
+  function handleExport() {
+    const signalLabels = signals.map(s => {
+      const msgName = getMessageName(s.id, dbcData)
+      return `${msgName} · B${s.byteIndex}`
+    })
+    chartRef.current?.exportPNG({
+      filename: importedFile?.name ?? 'unknown',
+      dbcName,
+      signalLabels,
+    })
   }
 
   if (!importedFile) {
@@ -62,21 +76,33 @@ function ChartView({ importedFile, dbcData, config, onConfigChange, themeKey }: 
           ))}
         </div>
 
-        <div className="chart-mode-selector">
-          {DISPLAY_MODES.map(m => (
-            <button
-              key={m.value}
-              className={`btn-mode ${displayMode === m.value ? 'btn-mode-active' : ''}`}
-              onClick={() => setDisplayMode(m.value)}
-            >
-              {m.label}
-            </button>
-          ))}
+        <div className="chart-topbar-right">
+          <div className="chart-mode-selector">
+            {DISPLAY_MODES.map(m => (
+              <button
+                key={m.value}
+                className={`btn-mode ${displayMode === m.value ? 'btn-mode-active' : ''}`}
+                onClick={() => setDisplayMode(m.value)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="btn-export"
+            onClick={handleExport}
+            disabled={signals.length === 0}
+            title="Export current view as PNG"
+          >
+            Export PNG
+          </button>
         </div>
       </div>
 
       {signals.length > 0 ? (
         <UPlotChart
+          ref={chartRef}
           key={importedFile.importKey}
           data={uplotData}
           signals={signals}
