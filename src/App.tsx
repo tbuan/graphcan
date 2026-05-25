@@ -6,6 +6,8 @@ import NavTabs from './components/NavTabs'
 import TableView from './views/TableView'
 import ChartView from './views/ChartView'
 import AnalysisView from './views/AnalysisView'
+import StatsView from './views/StatsView'
+import ScatterView from './views/ScatterView'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
 import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig, saveAnalysisPanels, loadAnalysisPanels } from './utils/storage'
 import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
@@ -186,8 +188,12 @@ function App() {
               <Route path="/chart" element={
                 <ChartView importedFile={importedFile} dbcData={dbcData} dbcName={dbcName} config={chartConfig} onConfigChange={setChartConfig} themeKey={darkMode ? 'dark' : 'light'} />
               } />
+              <Route path="/stats" element={<StatsView importedFile={importedFile} dbcData={dbcData} />} />
               <Route path="/analysis" element={
                 <AnalysisView panels={analysisPanels} importedFile={importedFile} dbcData={dbcData} dbcName={dbcName} onRemovePanel={handleRemovePanel} themeKey={darkMode ? 'dark' : 'light'} />
+              } />
+              <Route path="/scatter" element={
+                <ScatterView importedFile={importedFile} dbcData={dbcData} themeKey={darkMode ? 'dark' : 'light'} />
               } />
             </Routes>
           </main>
