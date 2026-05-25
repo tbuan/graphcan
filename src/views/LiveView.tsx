@@ -120,9 +120,48 @@ function LiveView({ dbcData, serial, ws }: LiveViewProps) {
   }
 
   function handleClear() {
+    setRecordState('idle')
     clearFrames()
     setFrozenFrames([])
     setPaused(false)
+  }
+
+  // ── Recording ──────────────────────────────────────────────────────────────
+  // frames is append-only, so we only need to remember the start index.
+  const [recordState,    setRecordState]    = useState<'idle' | 'naming' | 'recording'>('idle')
+  const [recordName,     setRecordName]     = useState('')
+  const [recordStartIdx, setRecordStartIdx] = useState(0)
+
+  function handleStartRecording() {
+    if (!recordName.trim()) return
+    setRecordStartIdx((frames as CanFrame[]).length)
+    setRecordState('recording')
+  }
+
+  function handleStopRecording() {
+    const recorded = (frames as CanFrame[]).slice(recordStartIdx)
+    setRecordState('idle')
+    if (recorded.length === 0) return
+
+    const withName = dbcData !== null
+    const headers  = ['Timestamp', 'ID', ...(withName ? ['Name'] : []), 'Direction', 'DLC', 'Data']
+    const rows     = recorded.map((f: CanFrame) => {
+      const label = withName ? getFilterLabel(normalizeFrameId(f.id)) : ''
+      const cols  = [f.timestamp, f.id, ...(withName ? [label] : []), f.direction, String(f.dlc), f.data.join(' ')]
+      return cols.map(v => `"${v.replace(/"/g, '""')}"`).join(',')
+    })
+
+    const csv  = [headers.join(','), ...rows].join('\r\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `${recordName.trim().replace(/[^a-z0-9_-]/gi, '_') || 'graphcan'}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    setRecordName('')
   }
 
   const isConnected  = status === 'connected'
@@ -291,6 +330,43 @@ function LiveView({ dbcData, serial, ws }: LiveViewProps) {
           >
             Filter{hiddenIds.size > 0 ? ` (${allPanelIds.length - hiddenIds.size}/${allPanelIds.length})` : ''}
           </button>
+
+          {recordState === 'idle' && (
+            <button
+              className="live-btn-record"
+              onClick={() => setRecordState('naming')}
+              title="Start recording frames to CSV"
+            >
+              ● Record
+            </button>
+          )}
+
+          {recordState === 'naming' && (
+            <div className="live-record-naming">
+              <input
+                className="live-record-input"
+                type="text"
+                placeholder="File name…"
+                value={recordName}
+                autoFocus
+                onChange={e => setRecordName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter')  handleStartRecording()
+                  if (e.key === 'Escape') setRecordState('idle')
+                }}
+              />
+              <button className="live-record-start" onClick={handleStartRecording}>Start</button>
+              <button className="live-record-cancel" onClick={() => setRecordState('idle')}>×</button>
+            </div>
+          )}
+
+          {recordState === 'recording' && (
+            <div className="live-recording-active">
+              <span className="live-rec-dot" />
+              <span className="live-rec-label">Recording…</span>
+              <button className="live-btn-stop" onClick={handleStopRecording}>Stop</button>
+            </div>
+          )}
 
           <button
             className="live-btn-disconnect"

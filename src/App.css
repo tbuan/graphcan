@@ -1704,6 +1704,102 @@
 }
 .lfp-remove:hover { color: var(--color-text); }
 
+/* ── Record controls ──────────────────────────────────────────────────────── */
+.live-btn-record {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: none;
+  color: #f87171;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.live-btn-record:hover { border-color: #f87171; }
+
+.live-record-naming {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.live-record-input {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid #f87171;
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 12px;
+  outline: none;
+  width: 160px;
+}
+
+.live-record-start {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #f87171;
+  border-radius: 4px;
+  background: #f87171;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+.live-record-start:hover { background: #ef4444; }
+
+.live-record-cancel {
+  height: 28px;
+  width: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.live-record-cancel:hover { color: var(--color-text); }
+
+.live-recording-active {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.live-rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f87171;
+  animation: rec-pulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes rec-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.live-rec-label {
+  font-size: 12px;
+  color: #f87171;
+  white-space: nowrap;
+}
+
+.live-btn-stop {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #f87171;
+  border-radius: 4px;
+  background: none;
+  color: #f87171;
+  font-size: 12px;
+  cursor: pointer;
+}
+.live-btn-stop:hover { background: #f87171; color: #fff; }
+
 .signal-panel-mode {
   background: none;
   border: 1px solid var(--color-border);
