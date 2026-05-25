@@ -137,7 +137,7 @@ function AnalysisView({ panels, importedFile, dbcData, dbcName, onRemovePanel, t
       ctx.beginPath(); ctx.arc(PAD + 12, y + PANEL_HDR_H / 2, 5, 0, Math.PI * 2); ctx.fill()
       ctx.fillStyle = '#1A1917'
       ctx.font      = '12px system-ui, sans-serif'
-      ctx.fillText(label, PAD + 24, y + PANEL_HDR_H / 2 + 4)
+      ctx.fillText(String(label), PAD + 24, y + PANEL_HDR_H / 2 + 4)
       y += PANEL_HDR_H
 
       ctx.drawImage(src, PAD, y, chartLogW, chartLogH)

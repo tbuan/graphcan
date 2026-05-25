@@ -75,11 +75,14 @@ export function buildOverviewData(
     for (const f of sampled) {
       const ts = parseTimestampToMs(f.timestamp)
       let val: number
-      if (panel.source.kind === 'byte') {
-        val = parseInt(f.data[panel.source.byteIndex] ?? '0', 16)
-      } else {
-        const sig = dbcData?.[panel.id]?.signals.find(s => s.name === panel.source.signalName)
+      const src = panel.source
+      if (src.kind === 'byte') {
+        val = parseInt(f.data[src.byteIndex] ?? '0', 16)
+      } else if (src.kind === 'signal') {
+        const sig = dbcData?.[panel.id]?.signals.find(s => s.name === src.signalName)
         val = sig ? decodeSignal(f.data.map(b => parseInt(b, 16)), sig) : 0
+      } else {
+        val = 0
       }
       rawPairs.push([ts, val])
       allTs.add(ts)
