@@ -13,13 +13,10 @@ const MT = 16   // top margin
 const MR = 20   // right margin
 const TICKS = 5
 
-function getTheme() {
-  const s = getComputedStyle(document.documentElement)
-  return {
-    border:    s.getPropertyValue('--color-border').trim()     || '#D5D3CE',
-    textMuted: s.getPropertyValue('--color-text-muted').trim() || '#89877F',
-    surface:   s.getPropertyValue('--color-surface').trim()    || '#FFFFFF',
-  }
+function getThemeColors(themeKey: string) {
+  return themeKey === 'dark'
+    ? { border: '#2A2D3A', textMuted: '#6B7280', surface: '#1A1D27' }
+    : { border: '#E2E0DC', textMuted: '#89877F', surface: '#FFFFFF'  }
 }
 
 function fmtTick(v: number): string {
@@ -47,7 +44,7 @@ export default function ScatterPlot({ points, xLabel, yLabel, themeKey }: Scatte
     const ctx = canvas.getContext('2d')!
     ctx.scale(dpr, dpr)
 
-    const theme = getTheme()
+    const theme = getThemeColors(themeKey)
     ctx.fillStyle = theme.surface
     ctx.fillRect(0, 0, W, H)
 

@@ -3,12 +3,10 @@ import uPlot from 'uplot'
 import 'uplot/dist/uPlot.min.css'
 import type { DisplayMode, Signal, Annotation } from '../types'
 
-function getTheme() {
-  const s = getComputedStyle(document.documentElement)
-  return {
-    border:    s.getPropertyValue('--color-border').trim()     || '#D5D3CE',
-    textMuted: s.getPropertyValue('--color-text-muted').trim() || '#89877F',
-  }
+function getThemeColors(themeKey: string) {
+  return themeKey === 'dark'
+    ? { border: '#2A2D3A', textMuted: '#6B7280' }
+    : { border: '#E2E0DC', textMuted: '#89877F' }
 }
 
 interface UPlotChartProps {
@@ -34,6 +32,9 @@ export interface UPlotChartHandle {
 const PAD        = 24
 const HEADER_H   = 84
 const LEGEND_ROW = 26
+
+// Survives component unmount (navigation) — restores zoom when coming back to the chart page
+let _persistedRange: { min: number; max: number } | null = null
 
 // ─── Plugins ──────────────────────────────────────────────────────────────────
 
@@ -253,7 +254,7 @@ const UPlotChart = forwardRef<UPlotChartHandle, UPlotChartProps>(
     useEffect(() => {
       const container = containerRef.current
       if (!container) return
-      const theme = getTheme()
+      const theme = getThemeColors(themeKey)
 
       const opts: uPlot.Options = {
         width:  container.clientWidth,
@@ -295,7 +296,13 @@ const UPlotChart = forwardRef<UPlotChartHandle, UPlotChartProps>(
         scales: { y: { range: () => [0, 255] } },
       }
 
-      plotRef.current = new uPlot(opts, data, container)
+      const u = new uPlot(opts, data, container)
+      plotRef.current = u
+
+      // Restore zoom (survives display-mode/theme changes AND page navigation)
+      if (_persistedRange) {
+        u.setScale('x', { min: _persistedRange.min, max: _persistedRange.max })
+      }
 
       const ro = new ResizeObserver(() => {
         plotRef.current?.setSize({ width: container.clientWidth, height: container.clientHeight })
@@ -303,6 +310,12 @@ const UPlotChart = forwardRef<UPlotChartHandle, UPlotChartProps>(
       ro.observe(container)
 
       return () => {
+        // Save zoom before destroying so it can be restored on next mount
+        const min = plotRef.current?.scales.x.min
+        const max = plotRef.current?.scales.x.max
+        if (min != null && max != null && isFinite(min) && isFinite(max)) {
+          _persistedRange = { min, max }
+        }
         plotRef.current?.destroy()
         plotRef.current = null
         ro.disconnect()

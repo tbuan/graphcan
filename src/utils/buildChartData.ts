@@ -109,12 +109,13 @@ export function buildDbcSignalData(
   frames: CanFrame[],
   canId: string,
   signal: DbcSignal,
+  globalT0Ms?: number,
 ): uPlot.AlignedData {
   const relevant = frames.filter(f => f.id === canId)
   const sampled  = downsample(relevant, MAX_POINTS_PER_SIGNAL)
   if (sampled.length === 0) return [[], []]
 
-  const t0     = parseTimestampToMs(sampled[0].timestamp)
+  const t0     = globalT0Ms ?? parseTimestampToMs(sampled[0].timestamp)
   const xAxis  = sampled.map(f => (parseTimestampToMs(f.timestamp) - t0) / 1000)
   const values = sampled.map(f => decodeSignal(f.data.map(b => parseInt(b, 16)), signal))
 

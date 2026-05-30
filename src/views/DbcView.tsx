@@ -92,14 +92,36 @@ export default function DbcView({
     }),
   [visibleSignals, selected])
 
-  // Grouped signals for the table (regular → mux switch → muxed by id)
+  // For each muxed signal name, collect all mux IDs it appears in (across the whole message)
+  const muxIdsByName = useMemo(() => {
+    const map = new Map<string, number[]>()
+    if (!selected) return map
+    for (const sig of selected.signals) {
+      if (sig.mux?.kind !== 'muxed') continue
+      const id = (sig.mux as { kind: 'muxed'; id: number }).id
+      if (!map.has(sig.name)) map.set(sig.name, [])
+      map.get(sig.name)!.push(id)
+    }
+    return map
+  }, [selected])
+
+  // Grouped signals for the table (regular → mux switch → muxed by id).
+  // When showing all mux IDs, collapse signals with the same name into one row.
   const groupedSignals = useMemo(() => {
-    const regular    = visibleSignals.filter(s => !s.mux)
-    const muxSwitch  = visibleSignals.filter(s => s.mux?.kind === 'switch')
-    const muxed      = visibleSignals.filter(s => s.mux?.kind === 'muxed')
-    const ids = [...new Set(muxed.map(s => (s.mux as { kind: 'muxed'; id: number }).id))].sort((a, b) => a - b)
-    return [...regular, ...muxSwitch, ...ids.flatMap(id => muxed.filter(s => (s.mux as { kind: 'muxed'; id: number }).id === id))]
-  }, [visibleSignals])
+    const regular   = visibleSignals.filter(s => !s.mux)
+    const muxSwitch = visibleSignals.filter(s => s.mux?.kind === 'switch')
+    const muxed     = visibleSignals.filter(s => s.mux?.kind === 'muxed')
+
+    let muxedRows: typeof muxed
+    if (selectedMux === 'all') {
+      const seen = new Set<string>()
+      muxedRows = muxed.filter(s => { if (seen.has(s.name)) return false; seen.add(s.name); return true })
+    } else {
+      const ids = [...new Set(muxed.map(s => (s.mux as { kind: 'muxed'; id: number }).id))].sort((a, b) => a - b)
+      muxedRows = ids.flatMap(id => muxed.filter(s => (s.mux as { kind: 'muxed'; id: number }).id === id))
+    }
+    return [...regular, ...muxSwitch, ...muxedRows]
+  }, [visibleSignals, selectedMux])
 
   if (!dbcData) {
     return <p className="main-placeholder">Load a DBC file to visualize it</p>
@@ -231,7 +253,9 @@ export default function DbcView({
                           const muxLabel = sig.mux?.kind === 'switch'
                             ? 'MUX'
                             : sig.mux?.kind === 'muxed'
-                              ? `m${(sig.mux as { kind: 'muxed'; id: number }).id}`
+                              ? selectedMux === 'all'
+                                ? (muxIdsByName.get(sig.name) ?? []).map(id => `m${id}`).join(' ')
+                                : `m${(sig.mux as { kind: 'muxed'; id: number }).id}`
                               : null
                           const hasValues = sig.values && Object.keys(sig.values).length > 0
                           const prevSig   = groupedSignals[i - 1]

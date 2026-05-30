@@ -6,13 +6,12 @@ import type { CanFrame } from '../parsers/busmaster'
 import type { DbcData, DbcSignal } from '../parsers/dbc'
 import { getMessageName } from '../utils/dbc'
 import { buildUPlotData, buildDbcSignalData } from '../utils/buildChartData'
+import { parseTimestampToMs } from '../utils/time'
 
-function getTheme() {
-  const s = getComputedStyle(document.documentElement)
-  return {
-    border:    s.getPropertyValue('--color-border').trim()     || '#D5D3CE',
-    textMuted: s.getPropertyValue('--color-text-muted').trim() || '#89877F',
-  }
+function getThemeColors(themeKey: string) {
+  return themeKey === 'dark'
+    ? { border: '#2A2D3A', textMuted: '#6B7280' }
+    : { border: '#E2E0DC', textMuted: '#89877F' }
 }
 
 interface SignalPanelProps {
@@ -89,6 +88,9 @@ function panPlugin(onScaleChange: SignalPanelProps['onScaleChange']): uPlot.Plug
   }
 }
 
+// Shared zoom range for all analysis panels — survives navigation and display-mode changes
+let _analysisZoom: { min: number; max: number } | null = null
+
 type DisplayMode = 'line' | 'points' | 'both'
 
 const DISPLAY_MODES: DisplayMode[] = ['line', 'points', 'both']
@@ -112,6 +114,7 @@ function SignalPanel({
   onRemoveRef.current = onAnnotationRemove
 
   const [displayMode, setDisplayMode] = useState<DisplayMode>('line')
+  const [hexMode, setHexMode] = useState(false)
 
   function cycleDisplayMode() {
     setDisplayMode(prev => DISPLAY_MODES[(DISPLAY_MODES.indexOf(prev) + 1) % DISPLAY_MODES.length])
@@ -128,8 +131,9 @@ function SignalPanel({
     : `${getMessageName(panel.id, dbcData)} · B${panel.source.byteIndex}`
 
   const data = useMemo(() => {
+    const globalT0 = frames.length ? parseTimestampToMs(frames[0].timestamp) : undefined
     if (panel.source.kind === 'signal' && dbcSignal) {
-      return buildDbcSignalData(frames, panel.id, dbcSignal)
+      return buildDbcSignalData(frames, panel.id, dbcSignal, globalT0)
     }
     if (panel.source.kind === 'byte') {
       return buildUPlotData(frames, [{ id: panel.id, byteIndex: panel.source.byteIndex }])
@@ -137,16 +141,14 @@ function SignalPanel({
     return [[], []] as uPlot.AlignedData
   }, [frames, panel.id, panel.source, dbcSignal])
 
-  // Redraw when annotations change, without recreating the plot
-  useEffect(() => {
-    plotRef.current?.redraw(false)
-  }, [annotations])
+  // Redraw annotations overlay without recreating the plot
+  useEffect(() => { plotRef.current?.redraw(false) }, [annotations])
 
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
-    const theme    = getTheme()
+    const theme    = getThemeColors(themeKey)
     const unit      = dbcSignal?.unit ?? ''
     const valuesMap = dbcSignal?.values
 
@@ -171,6 +173,9 @@ function SignalPanel({
           const mapped = valuesMap?.[Math.round(val)]
           if (mapped !== undefined) {
             valueRef.current.textContent = mapped
+          } else if (hexMode) {
+            const hex = Math.round(val).toString(16).toUpperCase().padStart(2, '0')
+            valueRef.current.textContent = `0x${hex}`
           } else {
             const formatted = Number.isInteger(val) ? String(val) : parseFloat(val.toPrecision(6)).toString()
             valueRef.current.textContent = unit ? `${formatted} ${unit}` : formatted
@@ -211,7 +216,18 @@ function SignalPanel({
       ],
       axes: [
         { stroke: theme.textMuted, ticks: { stroke: theme.border }, grid: { stroke: theme.border, width: 1 } },
-        { stroke: theme.textMuted, ticks: { stroke: theme.border }, grid: { stroke: theme.border, width: 1 }, size: 55 },
+        {
+          stroke: theme.textMuted,
+          ticks:  { stroke: theme.border },
+          grid:   { stroke: theme.border, width: 1 },
+          size:   65,
+          values: (_u: uPlot, vals: number[]) =>
+            vals.map(v =>
+              hexMode
+                ? `0x${Math.round(v).toString(16).toUpperCase().padStart(2, '0')}`
+                : Number.isInteger(v) ? String(v) : parseFloat(v.toPrecision(4)).toString()
+            ),
+        },
       ],
       scales: { y: { auto: true } },
       legend: { show: false },
@@ -219,6 +235,12 @@ function SignalPanel({
 
     const u = new uPlot(opts, data, container)
     plotRef.current = u
+
+    // Restore zoom (survives display-mode/theme changes AND page navigation)
+    if (_analysisZoom) {
+      u.setScale('x', { min: _analysisZoom.min, max: _analysisZoom.max })
+    }
+
     onReady(u)
 
     // Shift+click to add/remove annotation
@@ -239,10 +261,16 @@ function SignalPanel({
     ro.observe(container)
 
     return () => {
+      // Save zoom before destroying
+      const min = plotRef.current?.scales.x.min
+      const max = plotRef.current?.scales.x.max
+      if (min != null && max != null && isFinite(min) && isFinite(max)) {
+        _analysisZoom = { min, max }
+      }
       if (plotRef.current) { onDestroy(plotRef.current); plotRef.current.destroy(); plotRef.current = null }
       ro.disconnect()
     }
-  }, [data, syncKey, color, dbcSignal, displayMode, themeKey])
+  }, [data, syncKey, color, dbcSignal, displayMode, hexMode, themeKey])
 
   return (
     <div className="signal-panel">
@@ -256,6 +284,13 @@ function SignalPanel({
           title={`Display: ${displayMode}`}
         >
           {DISPLAY_MODE_LABEL[displayMode]}
+        </button>
+        <button
+          className={`signal-panel-mode ${hexMode ? 'signal-panel-mode-active' : ''}`}
+          onClick={() => setHexMode(h => !h)}
+          title="Toggle hex / decimal"
+        >
+          {hexMode ? 'HEX' : 'DEC'}
         </button>
         <button className="signal-panel-remove" onClick={onRemove} aria-label="Remove panel">×</button>
       </div>
