@@ -5,6 +5,7 @@ interface BitLayoutProps {
   dlc: number
   signals: DbcSignal[]
   colors: string[]
+  muxLabels?: Record<number, string>  // mux id → value name from switch signal
 }
 
 // Returns grid[byte][col] = signal index (-1 = unused).
@@ -45,26 +46,6 @@ function abbrev(name: string): string {
   return name.slice(0, 3).toUpperCase()
 }
 
-// For a given byte row, returns a mux label ("m0", "MUX") if ALL occupied
-// cells belong to a single mux group — null otherwise (show byte index instead).
-function muxRowLabel(row: number[], signals: DbcSignal[]): string | null {
-  const indices = [...new Set(row.filter(si => si >= 0))]
-  if (indices.length === 0) return null
-
-  const muxes = indices.map(si => signals[si]?.mux)
-
-  // Every signal in the row is the mux switch
-  if (muxes.every(m => m?.kind === 'switch')) return 'MUX'
-
-  // Every signal in the row is muxed with the same id
-  if (muxes.every(m => m?.kind === 'muxed')) {
-    const ids = new Set(muxes.map(m => (m as { kind: 'muxed'; id: number }).id))
-    if (ids.size === 1) return `m${[...ids][0]}`
-  }
-
-  return null
-}
-
 export default function BitLayout({ dlc, signals, colors }: BitLayoutProps) {
   const grid = useMemo(() => buildGrid(dlc, signals), [dlc, signals])
   const [hoveredSig, setHoveredSig] = useState<number | null>(null)
@@ -82,12 +63,9 @@ export default function BitLayout({ dlc, signals, colors }: BitLayoutProps) {
 
         {/* Data rows */}
         {grid.map((row, byteIdx) => {
-          const muxLabel = muxRowLabel(row, signals)
           return (
           <div key={byteIdx} className="bit-row">
-            <div className={`bit-byte-label ${muxLabel ? 'bit-byte-label-mux' : ''}`}>
-              {muxLabel ?? `B${byteIdx}`}
-            </div>
+            <div className="bit-byte-label">B{byteIdx}</div>
             {row.map((si, col) => {
               const sig     = si >= 0 ? signals[si] : null
               const color   = sig ? colors[si] : undefined

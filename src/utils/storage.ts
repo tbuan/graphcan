@@ -1,5 +1,6 @@
 import { openDB } from 'idb'
 import type { ChartConfig, AnalysisPanel } from '../types'
+import type { DbcData } from '../parsers/dbc'
 
 const DB_NAME = 'graphcan'
 const DB_VERSION = 2
@@ -45,6 +46,32 @@ export async function loadDbcFile(): Promise<StoredFile | undefined> {
 export async function clearDbcFile(): Promise<void> {
   const db = await getDB()
   await db.delete('dbc', 'last')
+}
+
+// ── DBC Editor state (localStorage) ─────────────────────────
+
+const EDITOR_DATA_KEY  = 'graphcan-editor-data'
+const EDITOR_NODES_KEY = 'graphcan-editor-nodes'
+
+export function saveEditorState(data: DbcData, nodes: string[]): void {
+  try {
+    localStorage.setItem(EDITOR_DATA_KEY,  JSON.stringify(data))
+    localStorage.setItem(EDITOR_NODES_KEY, JSON.stringify(nodes))
+  } catch { /* quota exceeded — silently ignore */ }
+}
+
+export function loadEditorState(): { data: DbcData; nodes: string[] } | null {
+  try {
+    const rawData  = localStorage.getItem(EDITOR_DATA_KEY)
+    const rawNodes = localStorage.getItem(EDITOR_NODES_KEY)
+    if (!rawData) return null
+    return {
+      data:  JSON.parse(rawData)  as DbcData,
+      nodes: rawNodes ? (JSON.parse(rawNodes) as string[]) : [],
+    }
+  } catch {
+    return null
+  }
 }
 
 // ── Analysis panels (localStorage) ───────────────────────────

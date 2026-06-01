@@ -9,8 +9,9 @@ import AnalysisView from './views/AnalysisView'
 import StatsView from './views/StatsView'
 import ScatterView from './views/ScatterView'
 import DbcView from './views/DbcView'
+import DbcEditorView from './views/DbcEditorView'
 import { parseDbcFile, type DbcData } from './parsers/dbc'
-import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig, saveAnalysisPanels, loadAnalysisPanels } from './utils/storage'
+import { saveFile, loadFile, saveDbcFile, loadDbcFile, clearDbcFile, saveChartConfig, loadChartConfig, saveAnalysisPanels, loadAnalysisPanels, saveEditorState, loadEditorState } from './utils/storage'
 import type { ImportedFile, ChartConfig, AnalysisPanel, AnalysisPanelSource } from './types'
 import { BYTE_COLORS } from './utils/chartColors'
 import ParseWorker from './workers/parseWorker?worker'
@@ -41,6 +42,10 @@ function App() {
   const [dbcSelectedKey, setDbcSelectedKey] = useState<string | null>(null)
   const [dbcSearch, setDbcSearch]           = useState('')
   const [dbcSelectedMux, setDbcSelectedMux] = useState<number | 'all'>('all')
+  const [editorData, setEditorData]           = useState<DbcData>(() => loadEditorState()?.data  ?? {})
+  const [editorNodes, setEditorNodes]         = useState<string[]>(() => loadEditorState()?.nodes ?? [])
+  const [editorSelectedKey, setEditorSelectedKey]       = useState<string | null>(null)
+  const [editorSelectedSigIdx, setEditorSelectedSigIdx] = useState<number | null>(null)
 
   // Restore persisted data on mount
   useEffect(() => {
@@ -63,6 +68,7 @@ function App() {
   // Persist chart config and analysis panels on every change
   useEffect(() => { saveChartConfig(chartConfig) }, [chartConfig])
   useEffect(() => { saveAnalysisPanels(analysisPanels) }, [analysisPanels])
+  useEffect(() => { saveEditorState(editorData, editorNodes) }, [editorData, editorNodes])
 
   // Apply dark mode to DOM + persist
   useEffect(() => {
@@ -152,8 +158,10 @@ function App() {
     window.addEventListener('mouseup', onMouseUp)
   }
 
-  const location = useLocation()
-  const isDbcRoute = location.pathname === '/dbc'
+  const location   = useLocation()
+  const isDbcRoute    = location.pathname === '/dbc'
+  const isEditorRoute = location.pathname === '/editor'
+  const hideSidebar   = isDbcRoute || isEditorRoute
 
   return (
     <div className="app">
@@ -170,7 +178,7 @@ function App() {
       <NavTabs />
       {isParsing && <div className="loading-bar" />}
       <div className="app-body">
-        {!isDbcRoute && (
+        {!hideSidebar && (
           <>
             <div className="sidebar-container" style={{ width: sidebarWidth }}>
               <Sidebar
@@ -216,6 +224,20 @@ function App() {
                   onSelectMux={setDbcSelectedMux}
                 />
               } />
+            <Route path="/editor" element={
+              <DbcEditorView
+                data={editorData}
+                onChange={setEditorData}
+                nodes={editorNodes}
+                onNodesChange={setEditorNodes}
+                selectedKey={editorSelectedKey}
+                onSelectKey={setEditorSelectedKey}
+                selectedSigIdx={editorSelectedSigIdx}
+                onSelectSigIdx={setEditorSelectedSigIdx}
+                importedDbc={dbcData}
+                onApplyToViewer={d => { setDbcData(d); setDbcName('editor.dbc') }}
+              />
+            } />
           </Routes>
         </main>
       </div>

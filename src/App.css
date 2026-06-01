@@ -1553,6 +1553,536 @@
   height: 100%;
 }
 
+/* ─── DBC Editor ─────────────────────────────────────────── */
+.dbc-editor {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* Left — message list */
+.dbc-editor-list {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+}
+
+.dbc-editor-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.dbc-editor-list-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.dbc-editor-btn-icon {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 16px;
+  line-height: 1;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+.dbc-editor-btn-icon:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+
+.dbc-editor-items { flex: 1; overflow-y: auto; }
+
+.dbc-editor-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.1s;
+}
+.dbc-editor-item:hover { background: var(--color-hover); }
+.dbc-editor-item-active {
+  background: var(--color-hover);
+  border-left-color: var(--color-accent);
+}
+
+.dbc-editor-item-body { flex: 1; min-width: 0; }
+.dbc-editor-item-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dbc-editor-item-id {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--color-text-muted);
+}
+.dbc-editor-item-del {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.1s, background 0.1s;
+}
+.dbc-editor-item:hover .dbc-editor-item-del { opacity: 1; }
+.dbc-editor-item-del:hover { background: #ef444420; color: #ef4444; }
+
+.dbc-editor-list-footer {
+  padding: 8px 10px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dbc-editor-count { font-size: 11px; color: var(--color-text-muted); }
+.dbc-editor-footer-btns { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.dbc-editor-btn-primary {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--color-accent);
+  color: var(--color-surface);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.12s;
+  white-space: nowrap;
+}
+.dbc-editor-btn-primary:hover { opacity: 0.85; }
+
+.dbc-editor-btn-secondary {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: none;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.dbc-editor-btn-secondary:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+
+/* Center — forms */
+.dbc-editor-form {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface-alt);
+}
+
+.dbc-editor-placeholder {
+  margin: auto;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.dbc-editor-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  padding: 12px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.dbc-editor-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dbc-editor-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dbc-editor-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.dbc-editor-btn-icon-sm {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.dbc-editor-btn-icon-sm:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+
+/* Form fields */
+.dbc-editor-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+
+.dbc-editor-field { display: flex; flex-direction: column; gap: 4px; }
+.dbc-editor-field-wide { grid-column: 1 / -1; }
+
+.dbc-editor-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dbc-editor-input {
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.12s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.dbc-editor-input:focus { border-color: var(--color-text-muted); }
+.dbc-editor-input-mono { font-family: monospace; }
+
+.dbc-editor-textarea {
+  resize: vertical;
+  min-height: 48px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Toggle buttons */
+.dbc-editor-toggle-group {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.dbc-editor-toggle {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.dbc-editor-toggle + .dbc-editor-toggle { border-left: 1px solid var(--color-border); }
+.dbc-editor-toggle:hover { background: var(--color-hover); color: var(--color-text); }
+.dbc-editor-toggle-active { background: var(--color-accent); color: var(--color-surface); }
+.dbc-editor-toggle-active:hover { background: var(--color-accent); opacity: 0.9; }
+
+/* Signal list */
+.dbc-editor-sig-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.dbc-editor-sig-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-left: 3px solid color-mix(in srgb, var(--sig-color) 35%, transparent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
+  background: var(--color-surface-alt);
+  transition: background 0.1s, border-color 0.1s;
+}
+.dbc-editor-sig-item:hover {
+  background: color-mix(in srgb, var(--sig-color) 6%, var(--color-surface));
+  border-left-color: color-mix(in srgb, var(--sig-color) 65%, transparent);
+}
+.dbc-editor-sig-item-active {
+  background: color-mix(in srgb, var(--sig-color) 12%, var(--color-surface));
+  border-left-color: var(--sig-color);
+  border-left-width: 4px;
+}
+.dbc-editor-sig-item-active .dbc-editor-sig-name {
+  font-weight: 600;
+}
+
+.dbc-editor-sig-item-body { flex: 1; min-width: 0; }
+.dbc-editor-sig-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.dbc-editor-sig-meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Signal sub-form */
+.dbc-editor-sig-form {
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dbc-editor-sig-form-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Right — bit preview */
+.dbc-editor-preview {
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Nodes section */
+.dbc-editor-nodes {
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+  max-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dbc-editor-nodes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.dbc-editor-nodes-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.dbc-editor-node-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  gap: 6px;
+}
+.dbc-editor-node-item:hover { background: var(--color-hover); }
+.dbc-editor-node-item:hover .dbc-editor-item-del { opacity: 1; }
+
+.dbc-editor-node-name {
+  flex: 1;
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--color-text);
+}
+
+.dbc-editor-node-add {
+  padding: 6px 8px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+  display: flex;
+}
+
+/* Receiver tags */
+.dbc-editor-rx-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+  margin-bottom: 2px;
+}
+
+.dbc-editor-rx-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+  cursor: default;
+}
+
+.dbc-editor-rx-tag button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 1px;
+}
+.dbc-editor-rx-tag button:hover { color: #ef4444; }
+
+.dbc-editor-rx-tag-off {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  cursor: pointer;
+  font-weight: 400;
+}
+.dbc-editor-rx-tag-off:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+/* Mux switch signal — dedicated section with amber accent */
+.dbc-editor-section-mux {
+  border-color: color-mix(in srgb, #F59E0B 40%, var(--color-border));
+  background: color-mix(in srgb, #F59E0B 4%, var(--color-surface));
+}
+.dbc-editor-section-mux .dbc-editor-section-title {
+  color: #B45309;
+}
+[data-theme="dark"] .dbc-editor-section-mux .dbc-editor-section-title {
+  color: #FCD34D;
+}
+
+/* Signal values editor */
+.dbc-editor-values-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.dbc-editor-value-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dbc-editor-value-key {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  min-width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.dbc-editor-value-label {
+  flex: 1;
+  padding: 4px 7px;
+  font-size: 12px;
+}
+
+.dbc-editor-value-del {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: background 0.1s, color 0.1s;
+}
+.dbc-editor-value-del:hover { background: #ef444420; color: #ef4444; }
+
+.dbc-editor-value-add {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.dbc-editor-value-key-input {
+  width: 64px;
+  flex-shrink: 0;
+  padding: 5px 7px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.dbc-editor-value-label-input {
+  flex: 1;
+  padding: 5px 7px;
+  font-size: 12px;
+}
+
+/* Conflict warning */
+.dbc-editor-conflicts {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #ef444415;
+  border: 1px solid #ef444440;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+.dbc-editor-conflict-icon { font-size: 16px; flex-shrink: 0; }
+.dbc-editor-conflict-title { font-weight: 700; color: #ef4444; margin-bottom: 4px; }
+.dbc-editor-conflict-item { color: var(--color-text-muted); font-family: monospace; font-size: 11px; }
+
 /* ─── DBC view ───────────────────────────────────────────── */
 .dbc-view {
   display: flex;

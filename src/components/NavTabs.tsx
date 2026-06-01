@@ -7,6 +7,7 @@ const TABS = [
   { path: '/stats',    label: 'Stats'    },
   { path: '/scatter',  label: 'Scatter'  },
   { path: '/dbc',      label: 'DBC'      },
+  { path: '/editor',   label: 'Editor'   },
 ]
 
 function NavTabs() {

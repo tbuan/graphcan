@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState, Fragment } from 'react'
 import type { DbcData } from '../parsers/dbc'
 import BitLayout from '../components/BitLayout'
+import { getMuxLabel, getSwitchSignal } from '../utils/dbc'
 
 interface DbcViewProps {
   dbcData:      DbcData | null
@@ -59,9 +60,11 @@ export default function DbcView({
     )
   }, [messages, search])
 
-  const selected     = selectedKey ? dbcData?.[selectedKey] ?? null : null
-  const hasMux       = selected?.signals.some(s => s.mux !== undefined) ?? false
-  const effectiveDlc = selected ? (selected.dlc > 0 ? selected.dlc : 8) : 8
+  const selected      = selectedKey ? dbcData?.[selectedKey] ?? null : null
+  const hasMux        = selected?.signals.some(s => s.mux !== undefined) ?? false
+  const effectiveDlc  = selected ? (selected.dlc > 0 ? selected.dlc : 8) : 8
+  const switchSignal  = selected ? getSwitchSignal(selected.signals) : null
+  const switchValues  = switchSignal?.values ?? {}
 
   // All mux IDs present in this message
   const muxIds = useMemo(() => {
@@ -187,7 +190,7 @@ export default function DbcView({
                 >
                   <option value="all">All mux IDs</option>
                   {muxIds.map(id => (
-                    <option key={id} value={id}>Mux {id}</option>
+                    <option key={id} value={id}>{getMuxLabel(id, switchSignal)}</option>
                   ))}
                 </select>
               )}
@@ -219,6 +222,7 @@ export default function DbcView({
                       dlc={effectiveDlc}
                       signals={visibleSignals}
                       colors={visibleColors}
+                      muxLabels={switchValues}
                     />
                   </div>
                 </section>
@@ -254,8 +258,8 @@ export default function DbcView({
                             ? 'MUX'
                             : sig.mux?.kind === 'muxed'
                               ? selectedMux === 'all'
-                                ? (muxIdsByName.get(sig.name) ?? []).map(id => `m${id}`).join(' ')
-                                : `m${(sig.mux as { kind: 'muxed'; id: number }).id}`
+                                ? (muxIdsByName.get(sig.name) ?? []).map(id => getMuxLabel(id, switchSignal)).join(' ')
+                                : getMuxLabel((sig.mux as { kind: 'muxed'; id: number }).id, switchSignal)
                               : null
                           const hasValues = sig.values && Object.keys(sig.values).length > 0
                           const prevSig   = groupedSignals[i - 1]
@@ -355,7 +359,7 @@ export default function DbcView({
                           const muxLabel = sig.mux?.kind === 'switch'
                             ? 'MUX'
                             : sig.mux?.kind === 'muxed'
-                              ? `m${(sig.mux as { kind: 'muxed'; id: number }).id}`
+                              ? getMuxLabel((sig.mux as { kind: 'muxed'; id: number }).id, switchSignal)
                               : null
                           return (
                             <tr key={i} className="dbc-sig-row">
